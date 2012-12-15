@@ -34,9 +34,18 @@ var GameLayer = cc.Layer.extend({
 		return true;
 	},
     onTouchesEnded: function(ptouch, evt){
-        var location = ptouch[0].getLocation();
-        this.cat.setPosition(location);
-        // console.log("move")
+        this.cat.stopAllActions();
+
+        var location = ptouch[0].getLocation()
+          , cat      = this.cat
+          , distance = Math.sqrt( Math.pow(cat.getPositionX() - location.x, 2) + Math.pow(cat.getPositionY() - location.y, 2) )
+          , move     = cc.MoveTo.create(distance / 300, location )
+
+        
+        // this.cat.setPosition(location);
+        // cc.MoveTo.create(duration, position)
+
+        this.cat.runAction(move)
     },
     onMouseDown: function(evt){
         this.cat.setPosition(cc.p(evt.x, evt.y));
