@@ -22,6 +22,9 @@ var GameLayer = cc.Layer.extend({
         this.cat.setPosition(cc.p(this.screenSize.width / 2, this.screenSize.height / 2));
         this.addChild(this.cat);
 
+        this.host = new Host();
+        this.host.setPosition(cc.p(this.screenSize.width / 2, this.screenSize.height / 2));
+        this.addChild(this.host);
         // this.sprite = cc.Sprite.create("game/res/objects.png");
         // this.sprite.setPosition(cc.p(this.screenSize.width / 2, this.screenSize.height / 2));
         // this.sprite.setVisible(true);
