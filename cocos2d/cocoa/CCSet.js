@@ -28,6 +28,7 @@
  * @class
  * @extends cc.Class
  */
+
 cc.Set = cc.Class.extend(/** @lends cc.Set# */{
     /**
      * Constructor
@@ -35,10 +36,12 @@ cc.Set = cc.Class.extend(/** @lends cc.Set# */{
      */
     ctor:function (setObject) {
         if (setObject) {
-            this._set = [].concat(setObject._set);
-        } else {
-            this._set = [];
+            this._set = Object.create(setObject._set);
         }
+        else {
+            this._set = new Array();
+        }
+
     },
 
     /**
@@ -46,7 +49,7 @@ cc.Set = cc.Class.extend(/** @lends cc.Set# */{
      * @return {cc.Set}
      */
     copy:function () {
-        return new cc.Set(this);
+        return new this.Set(this);
     },
 
     /**
@@ -55,6 +58,7 @@ cc.Set = cc.Class.extend(/** @lends cc.Set# */{
      */
     mutableCopy:function () {
         return this.copy();
+
     },
 
     /**
@@ -63,6 +67,7 @@ cc.Set = cc.Class.extend(/** @lends cc.Set# */{
      */
     count:function () {
         return this._set.length;
+
     },
 
     /**
@@ -70,11 +75,8 @@ cc.Set = cc.Class.extend(/** @lends cc.Set# */{
      * @param {object} obj
      */
     addObject:function (obj) {
-        if(cc.ArrayContainsObject(this._set,obj))
-            return;
         this._set.push(obj);
-        //sort
-        this._set.sort(function(a,b){return a-b;});
+
     },
 
     /**
@@ -82,6 +84,10 @@ cc.Set = cc.Class.extend(/** @lends cc.Set# */{
      * @param {object} obj
      */
     removeObject:function (obj) {
+        /* if(obj in this._set)
+         {
+         delete this._set[obj]
+         } */
         var k = 0;
         for (var i = 0, n = 0; i < this._set.length; i++) {
             if (this._set[i] != obj) {
@@ -89,27 +95,8 @@ cc.Set = cc.Class.extend(/** @lends cc.Set# */{
                 k++;
             }
         }
-        this._set.length = k;
-    },
+        array.length = k;
 
-    /**
-     * Return the iterator that points to the first element.
-     * @reture Object
-     */
-    begin:function(){
-        if(this._set && this._set.length > 0)
-            return this._set[0];
-        return null;
-    },
-
-    /**
-     * Return the iterator that points to the poisition after the last element.
-     * @reture Object
-     */
-    end:function(){
-        if(this._set && this._set.length > 0)
-            return this._set[this._set.length -1];
-        return null;
     },
 
     /**
@@ -118,22 +105,34 @@ cc.Set = cc.Class.extend(/** @lends cc.Set# */{
      * @return {Boolean}
      */
     containsObject:function (obj) {
-        return cc.ArrayContainsObject(this._set,obj);
+
+        if ((obj in this._set) == true) {
+            return true;
+        }
+        else {
+            return false;
+        }
+
+
     },
+
 
     /**
      * Return the first element if it contains elements, or null if it doesn't contain any element.
      * @return {object|Null}
      */
     anyObject:function () {
-        if (this._set && this._set.length > 0) {
+        if (this._set.length > 0) {
             return this._set[0];
-        } else {
+        }
+        else {
             return null;
         }
+
     },
 
     _set:null
+
 });
 
 /**

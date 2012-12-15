@@ -92,6 +92,30 @@ cc.DEVICE_ORIENTATION_LANDSCAPE_RIGHT = 3;
  */
 cc.DEVICE_MAX_ORIENTATIONS = 2;
 
+// Backward compatibility stuff
+/**
+ * @constant
+ * @type Number
+ */
+cc.DEVICE_ORIENTATION_PORTRAIT = cc.DEVICE_ORIENTATION_PORTRAIT;
+
+/**
+ * @constant
+ * @type Number
+ */
+cc.DEVICE_ORIENTATION_PORTRAIT_UPSIDE_DOWN = cc.DEVICE_ORIENTATION_PORTRAIT_UPSIDE_DOWN;
+
+/**
+ * @constant
+ * @type Number
+ */
+cc.DEVICE_ORIENTATION_LANDSCAPE_LEFT = cc.DEVICE_ORIENTATION_LANDSCAPE_LEFT;
+
+/**
+ * @constant
+ * @type Number
+ */
+cc.DEVICE_ORIENTATION_LANDSCAPE_RIGHT = cc.DEVICE_ORIENTATION_LANDSCAPE_RIGHT;
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -152,7 +176,7 @@ cc.Director = cc.Class.extend(/** @lends cc.Director# */{
     _scenesStack:null,
     _projectionDelegate:null,
     _runningScene:null,
-
+    _szFPS:'',
     _frames:0,
     _totalFrames:0,
     _secondsPerFrame:0,
@@ -162,32 +186,18 @@ cc.Director = cc.Class.extend(/** @lends cc.Director# */{
     _scheduler:null,
     _actionManager:null,
     _touchDispatcher:null,
-    _keyboardDispatcher:null,
+    _keypadDispatcher:null,
     _accelerometer:null,
-    _mouseDispatcher:null,
 
     _watcherFun:null,
     _watcherSender:null,
-
-    _currTimeValue:null,
-    _isBlur:false,
+    _levelNum:1,
 
     /**
      * Constructor
      */
-    ctor:function () {
-        this._currTimeValue = new cc.timeval();
-        this._lastUpdate = new cc.timeval();
-        if(!cc.isAddedHiddenEvent){
-            var selfPointer = this;
-            window.addEventListener("focus",function(){
-                selfPointer._lastUpdate = cc.Time.gettimeofdayCocos2d(selfPointer._lastUpdate);
-            }, false);
-        }
-    },
+    ctor:function(){
 
-    _resetLastUpdate:function(){
-        this._lastUpdate = cc.Time.gettimeofdayCocos2d(this._lastUpdate);
     },
 
     /**
@@ -213,6 +223,7 @@ cc.Director = cc.Class.extend(/** @lends cc.Director# */{
         this._frameRate = 0;
         this._displayStats = false;//can remove
         this._totalFrames = this._frames = 0;
+        this._szFPS = "";
         this._lastUpdate = new cc.timeval();
 
         //Paused?
@@ -220,7 +231,7 @@ cc.Director = cc.Class.extend(/** @lends cc.Director# */{
 
         //purge?
         this._purgeDirecotorInNextLoop = false;
-        this._winSizeInPixels = this._winSizeInPoints = cc.size(cc.canvas.width, cc.canvas.height);
+        this._winSizeInPixels = this._winSizeInPoints = cc.SizeMake(cc.canvas.width, cc.canvas.height);
 
         this._openGLView = null;
         this._contentScaleFactor = 1.0;
@@ -238,15 +249,12 @@ cc.Director = cc.Class.extend(/** @lends cc.Director# */{
         this._touchDispatcher = new cc.TouchDispatcher();
         this._touchDispatcher.init();
 
-        //KeyboardDispatcher
-        this._keyboardDispatcher = cc.KeyboardDispatcher.getInstance();
+        //KeypadDispatcher
+        this._keypadDispatcher = new cc.KeypadDispatcher.getInstance();
 
+        this._levelNum = 1;
         //accelerometer
         //this._accelerometer = new cc.Accelerometer();
-
-        //MouseDispatcher
-        this._mouseDispatcher = new cc.MouseDispatcher();
-        this._mouseDispatcher.init();
 
         return true;
     },
@@ -255,7 +263,8 @@ cc.Director = cc.Class.extend(/** @lends cc.Director# */{
      * calculates delta time since last time it was called
      */
     calculateDeltaTime:function () {
-        var now = cc.Time.gettimeofdayCocos2d(this._currTimeValue);
+        var now = new cc.timeval();
+        now = cc.Time.gettimeofdayCocos2d();
         if (!now) {
             cc.log("error in gettimeofday");
             this._deltaTime = 0;
@@ -276,8 +285,7 @@ cc.Director = cc.Class.extend(/** @lends cc.Director# */{
                 this._deltaTime = 1 / 60.0;
             }
         }
-        this._lastUpdate.tv_sec = now.tv_sec;
-        this._lastUpdate.tv_usec = now.tv_usec;
+        this._lastUpdate = now;
     },
 
     /**
@@ -301,7 +309,7 @@ cc.Director = cc.Class.extend(/** @lends cc.Director# */{
      */
     convertToUI:function (point) {
         var oppositeY = this._winSizeInPoints.height - point.y;
-        return cc.p(point.x, oppositeY);
+        return cc.p(point.x,oppositeY);
     },
 
     //_fullRect:null,
@@ -316,7 +324,7 @@ cc.Director = cc.Class.extend(/** @lends cc.Director# */{
         if (!this._paused) {
             this._scheduler.update(this._deltaTime);
         }
-        //this._fullRect = cc.rect(0, 0, cc.canvas.width, cc.canvas.height);
+        //this._fullRect = new cc.Rect(0, 0, cc.canvas.width, cc.canvas.height);
         //cc.renderContext.clearRect(this._fullRect.origin.x, this._fullRect.origin.y, this._fullRect.size.width, -this._fullRect.size.height);
         cc.renderContext.clearRect(0, 0, cc.canvas.width, -cc.canvas.height);
 
@@ -327,7 +335,7 @@ cc.Director = cc.Class.extend(/** @lends cc.Director# */{
          if (this._dirtyRegion) {
          //cc.renderContext.clearRect(0, 0, cc.canvas.width, -cc.canvas.height);
 
-         var fullRect = cc.rect(0, 0, cc.canvas.width, cc.canvas.height);
+         var fullRect = new cc.Rect(0, 0, cc.canvas.width, cc.canvas.height);
          this._dirtyRegion = cc.Rect.CCRectIntersection(this._dirtyRegion, fullRect);
 
          if(cc.Rect.CCRectEqualToRect(cc.RectZero(), this._dirtyRegion)){
@@ -382,7 +390,7 @@ cc.Director = cc.Class.extend(/** @lends cc.Director# */{
             this._showStats();
         }
 
-        if (this._watcherFun && this._watcherSender) {
+        if(this._watcherFun && this._watcherSender){
             this._watcherFun.call(this._watcherSender);
         }
 
@@ -396,7 +404,7 @@ cc.Director = cc.Class.extend(/** @lends cc.Director# */{
             this._openGLView.swapBuffers();
         }
 
-        if (this._displayStats) {
+        if(this._displayStats){
             this._calculateMPF();
         }
     },
@@ -406,11 +414,11 @@ cc.Director = cc.Class.extend(/** @lends cc.Director# */{
             return;
 
         if (!this._dirtyRegion) {
-            this._dirtyRegion = cc.rect(rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
+            this._dirtyRegion = new cc.Rect(rect.origin.x, rect.origin.y, rect.size.width, rect.size.height);
             return;
         }
         this._dirtyRegion = cc.Rect.CCRectUnion(this._dirtyRegion,
-            cc.rect(rect.origin.x, rect.origin.y, rect.size.width, rect.size.height));
+            new cc.Rect(rect.origin.x, rect.origin.y, rect.size.width, rect.size.height));
     },
 
     rectIsInDirtyRegion:function (rect) {
@@ -541,7 +549,7 @@ cc.Director = cc.Class.extend(/** @lends cc.Director# */{
     popScene:function () {
         cc.Assert(this._runningScene != null, "running scene should not null");
 
-        //this.addRegionToDirtyRegion(cc.rect(0, 0, cc.canvas.width, cc.canvas.height));
+        //this.addRegionToDirtyRegion(new cc.Rect(0, 0, cc.canvas.width, cc.canvas.height));
 
         this._scenesStack.pop();
         var c = this._scenesStack.length;
@@ -621,7 +629,7 @@ cc.Director = cc.Class.extend(/** @lends cc.Director# */{
     pushScene:function (scene) {
         cc.Assert(scene, "the scene should not null");
 
-        //this.addRegionToDirtyRegion(cc.rect(0, 0, cc.canvas.width, cc.canvas.height));
+        //this.addRegionToDirtyRegion(new cc.Rect(0, 0, cc.canvas.width, cc.canvas.height));
 
         this._sendCleanupToScene = false;
 
@@ -636,7 +644,7 @@ cc.Director = cc.Class.extend(/** @lends cc.Director# */{
     replaceScene:function (scene) {
         cc.Assert(scene != null, "the scene should not be null");
 
-        //this.addRegionToDirtyRegion(cc.rect(0, 0, cc.canvas.width, cc.canvas.height));
+        //this.addRegionToDirtyRegion(new cc.Rect(0, 0, cc.canvas.width, cc.canvas.height));
         var i = this._scenesStack.length;
 
         this._sendCleanupToScene = true;
@@ -649,9 +657,9 @@ cc.Director = cc.Class.extend(/** @lends cc.Director# */{
      * @param {cc.Size} newWindowSize
      */
     reshapeProjection:function (newWindowSize) {
-        if (this._openGLView) {
+        if(this._openGLView){
             this._winSizeInPoints = this._openGLView.getSize();
-            this._winSizeInPixels = cc.size(this._winSizeInPoints.width * this._contentScaleFactor,
+            this._winSizeInPixels = cc.SizeMake(this._winSizeInPoints.width * this._contentScaleFactor,
                 this._winSizeInPoints.height * this._contentScaleFactor);
 
             this.setProjection(this._projection);
@@ -665,7 +673,7 @@ cc.Director = cc.Class.extend(/** @lends cc.Director# */{
         if (!this._paused) {
             return;
         }
-        //this.addRegionToDirtyRegion(cc.rect(0, 0, cc.canvas.width, cc.canvas.height));
+        //this.addRegionToDirtyRegion(new cc.Rect(0, 0, cc.canvas.width, cc.canvas.height));
 
         this.setAnimationInterval(this._oldAnimationInterval);
         this._lastUpdate = cc.Time.gettimeofdayCocos2d();
@@ -689,7 +697,7 @@ cc.Director = cc.Class.extend(/** @lends cc.Director# */{
         cc.Assert(scene != null, "running scene should not be null");
         cc.Assert(this._runningScene == null, "_runningScene should be null");
 
-        //this.addRegionToDirtyRegion(cc.rect(0, 0, cc.canvas.width, cc.canvas.height));
+        //this.addRegionToDirtyRegion(new cc.Rect(0, 0, cc.canvas.width, cc.canvas.height));
 
         this.pushScene(scene);
         this.startAnimation();
@@ -722,7 +730,7 @@ cc.Director = cc.Class.extend(/** @lends cc.Director# */{
     setContentScaleFactor:function (scaleFactor) {
         if (scaleFactor != this._contentScaleFactor) {
             this._contentScaleFactor = scaleFactor;
-            this._winSizeInPixels = cc.size(this._winSizeInPoints.width * scaleFactor, this._winSizeInPoints.height * scaleFactor);
+            this._winSizeInPixels = cc.SizeMake(this._winSizeInPoints.width * scaleFactor, this._winSizeInPoints.height * scaleFactor);
 
             if (this._openGLView) {
                 this.updateContentScaleFactor();
@@ -828,11 +836,11 @@ cc.Director = cc.Class.extend(/** @lends cc.Director# */{
 
             // set size
             this._winSizeInPoints = this._openGLView.getSize();
-            this._winSizeInPixels = cc.size(this._winSizeInPoints.width * this._contentScaleFactor, this._winSizeInPoints.height * this._contentScaleFactor);
+            this._winSizeInPixels = cc.SizeMake(this._winSizeInPoints.width * this._contentScaleFactor, this._winSizeInPoints.height * this._contentScaleFactor);
 
             this._createStatsLabel();
 
-            if (this._openGLView) {
+            if(this._openGLView){
                 this.setGLDefaultValues();
             }
 
@@ -855,7 +863,7 @@ cc.Director = cc.Class.extend(/** @lends cc.Director# */{
         var size = this._winSizeInPixels;
         var sizePoint = this._winSizeInPoints;
 
-        if (this._openGLView) {
+        if(this._openGLView){
             this._openGLView.setViewPortInPoints(0, 0, sizePoint.width, sizePoint.height);
         }
 
@@ -863,36 +871,36 @@ cc.Director = cc.Class.extend(/** @lends cc.Director# */{
             case cc.DIRECTOR_PROJECTION_2D:
                 //TODO OpenGL
                 /* kmGLMatrixMode(KM_GL_PROJECTION);
-                 kmGLLoadIdentity();
-                 kmMat4 orthoMatrix;
-                 kmMat4OrthographicProjection(&orthoMatrix, 0, size.width / CC_CONTENT_SCALE_FACTOR(), 0, size.height / CC_CONTENT_SCALE_FACTOR(), -1024, 1024 );
-                 kmGLMultMatrix(&orthoMatrix);
-                 kmGLMatrixMode(KM_GL_MODELVIEW);
-                 kmGLLoadIdentity();*/
+                kmGLLoadIdentity();
+                kmMat4 orthoMatrix;
+                kmMat4OrthographicProjection(&orthoMatrix, 0, size.width / CC_CONTENT_SCALE_FACTOR(), 0, size.height / CC_CONTENT_SCALE_FACTOR(), -1024, 1024 );
+                kmGLMultMatrix(&orthoMatrix);
+                kmGLMatrixMode(KM_GL_MODELVIEW);
+                kmGLLoadIdentity();*/
                 break;
             case cc.DIRECTOR_PROJECTION_3D:
                 //TODO OpenGl
                 /* float zeye = this->getZEye();
 
-                 kmMat4 matrixPerspective, matrixLookup;
+                kmMat4 matrixPerspective, matrixLookup;
 
-                 kmGLMatrixMode(KM_GL_PROJECTION);
-                 kmGLLoadIdentity();
+                kmGLMatrixMode(KM_GL_PROJECTION);
+                kmGLLoadIdentity();
 
-                 // issue #1334
-                 kmMat4PerspectiveProjection( &matrixPerspective, 60, (GLfloat)size.width/size.height, 0.1f, zeye*2);
-                 // kmMat4PerspectiveProjection( &matrixPerspective, 60, (GLfloat)size.width/size.height, 0.1f, 1500);
+                // issue #1334
+                kmMat4PerspectiveProjection( &matrixPerspective, 60, (GLfloat)size.width/size.height, 0.1f, zeye*2);
+                // kmMat4PerspectiveProjection( &matrixPerspective, 60, (GLfloat)size.width/size.height, 0.1f, 1500);
 
-                 kmGLMultMatrix(&matrixPerspective);
+                kmGLMultMatrix(&matrixPerspective);
 
-                 kmGLMatrixMode(KM_GL_MODELVIEW);
-                 kmGLLoadIdentity();
-                 kmVec3 eye, center, up;
-                 kmVec3Fill( &eye, sizePoint.width/2, sizePoint.height/2, zeye );
-                 kmVec3Fill( &center, sizePoint.width/2, sizePoint.height/2, 0.0f );
-                 kmVec3Fill( &up, 0.0f, 1.0f, 0.0f);
-                 kmMat4LookAt(&matrixLookup, &eye, &center, &up);
-                 kmGLMultMatrix(&matrixLookup);*/
+                kmGLMatrixMode(KM_GL_MODELVIEW);
+                kmGLLoadIdentity();
+                kmVec3 eye, center, up;
+                kmVec3Fill( &eye, sizePoint.width/2, sizePoint.height/2, zeye );
+                kmVec3Fill( &center, sizePoint.width/2, sizePoint.height/2, 0.0f );
+                kmVec3Fill( &up, 0.0f, 1.0f, 0.0f);
+                kmMat4LookAt(&matrixLookup, &eye, &center, &up);
+                kmGLMultMatrix(&matrixLookup);*/
                 break;
             case cc.DIRECTOR_PROJECTION_CUSTOM:
                 if (this._projectionDelegate) {
@@ -915,8 +923,8 @@ cc.Director = cc.Class.extend(/** @lends cc.Director# */{
     _showStats:function () {
         this._frames++;
         this._accumDt += this._deltaTime;
-        if (this._displayStats) {
-            if (this._FPSLabel && this._SPFLabel && this._drawsLabel) {
+        if(this._displayStats){
+            if(this._FPSLabel && this._SPFLabel && this._drawsLabel){
                 if (this._accumDt > cc.DIRECTOR_FPS_INTERVAL) {
                     this._SPFLabel.setString(this._secondsPerFrame.toFixed(3));
 
@@ -924,13 +932,15 @@ cc.Director = cc.Class.extend(/** @lends cc.Director# */{
                     this._frames = 0;
                     this._accumDt = 0;
 
-                    this._FPSLabel.setString(this._frameRate.toFixed(1));
-                    this._drawsLabel.setString((0 | cc.g_NumberOfDraws).toString());
+                    this._szFPS = ('' + this._frameRate.toFixed(1));
+                    this._FPSLabel.setString(this._szFPS);
+
+                    this._drawsLabel.setString((0|cc.g_NumberOfDraws).toString());
                 }
                 this._FPSLabel.visit();
                 this._SPFLabel.visit();
                 this._drawsLabel.visit();
-            } else {
+            }else{
                 this._createStatsLabel();
             }
         }
@@ -998,8 +1008,8 @@ cc.Director = cc.Class.extend(/** @lends cc.Director# */{
     /**
      * seconds per frame
      */
-    getSecondsPerFrame:function () {
-        return this._secondsPerFrame;
+    getSecondsPerFrame:function(){
+       return this._secondsPerFrame;
     },
 
     /**
@@ -1050,7 +1060,7 @@ cc.Director = cc.Class.extend(/** @lends cc.Director# */{
      *     ONLY call it if there is a running scene.
      * </p>
      */
-    popToRootScene:function () {
+    popToRootScene:function(){
         cc.Assert(this._runningScene != null, "A running Scene is needed");
         var c = this._scenesStack.length;
 
@@ -1060,94 +1070,86 @@ cc.Director = cc.Class.extend(/** @lends cc.Director# */{
         } else {
             while (c > 1) {
                 var current = this._scenesStack.pop();
-                if (current.isRunning()) {
+                if( current.isRunning()) {
                     current.onExit();
                 }
                 current.cleanup();
                 c--;
             }
-            this._nextScene = this._scenesStack[this._scenesStack.length - 1];
+            this._nextScene = this._scenesStack[this._scenesStack.length -1];
             this._sendCleanupToScene = false;
         }
     },
 
-    setWatcherCallbackFun:function (pSender, func) {
-        this._watcherFun = func;
+    setWatcherCallbackFun:function(pSender,func){
+       this._watcherFun = func;
         this._watcherSender = pSender;
     },
 
     /**
      * (cc.Scheduler associated with this director)
      */
-    getScheduler:function () {
+    getScheduler:function(){
         return this._scheduler;
     },
 
-    setScheduler:function (scheduler) {
+    setScheduler:function(scheduler){
         if (this._scheduler != scheduler) {
             this._scheduler = scheduler;
         }
     },
 
-    getActionManager:function () {
-        return this._actionManager;
+    getActionManager:function(){
+       return this._actionManager;
     },
-    setActionManager:function (actionManager) {
+    setActionManager:function(actionManager){
         if (this._actionManager != actionManager) {
             this._actionManager = actionManager;
         }
     },
 
-    getTouchDispatcher:function () {
-        return this._touchDispatcher;
+    getTouchDispatcher:function(){
+       return this._touchDispatcher;
     },
-    setTouchDispatcher:function (touchDispatcher) {
+    setTouchDispatcher:function(touchDispatcher){
         if (this._touchDispatcher != touchDispatcher) {
             this._touchDispatcher = touchDispatcher;
         }
     },
 
-    getKeyboardDispatcher:function () {
-        return this._keyboardDispatcher;
+    getKeypadDispatcher:function(){
+        return this._keypadDispatcher;
     },
-    setKeyboardDispatcher:function (keyboardDispatcher) {
-        this._keyboardDispatcher = keyboardDispatcher;
+    setKeypadDispatcher:function(keypadDispatcher){
+        this._keypadDispatcher = keypadDispatcher;
     },
 
-    getAccelerometer:function () {
-        return this._accelerometer;
+    getAccelerometer:function(){
+       return this._accelerometer;
     },
-    setAccelerometer:function (accelerometer) {
+    setAccelerometer:function(accelerometer){
         if (this._accelerometer != accelerometer) {
             this._accelerometer = accelerometer;
         }
     },
 
-    getMouseDispatcher:function(){
-       return this._mouseDispatcher;
+    _createStatsLabel:function(){
+        this._FPSLabel = cc.LabelTTF.create("00.0",cc.SizeMake(60,16), cc.TEXT_ALIGNMENT_RIGHT, "Arial", 18);
+        this._SPFLabel = cc.LabelTTF.create("0.000",cc.SizeMake(60,16), cc.TEXT_ALIGNMENT_RIGHT, "Arial", 18);
+        this._drawsLabel = cc.LabelTTF.create("000",cc.SizeMake(60,16), cc.TEXT_ALIGNMENT_RIGHT, "Arial", 18);
+
+        this._drawsLabel.setPosition( cc.pAdd( cc.p(20,48), cc.DIRECTOR_STATS_POSITION ) );
+        this._SPFLabel.setPosition( cc.pAdd( cc.p(20,30), cc.DIRECTOR_STATS_POSITION ) );
+        this._FPSLabel.setPosition( cc.pAdd( cc.p(20,10), cc.DIRECTOR_STATS_POSITION ) );
     },
 
-    setMouseDispatcher:function( mouseDispatcher){
-        if(this._mouseDispatcher != mouseDispatcher)
-            this._mouseDispatcher = mouseDispatcher;
-    },
-
-    _createStatsLabel:function () {
-        this._FPSLabel = cc.LabelTTF.create("00.0", "Arial", 18, cc.size(60, 16), cc.TEXT_ALIGNMENT_RIGHT);
-        this._SPFLabel = cc.LabelTTF.create("0.000", "Arial", 18, cc.size(60, 16), cc.TEXT_ALIGNMENT_RIGHT);
-        this._drawsLabel = cc.LabelTTF.create("000", "Arial", 18, cc.size(60, 16), cc.TEXT_ALIGNMENT_RIGHT);
-
-        this._drawsLabel.setPosition(cc.pAdd(cc.p(20, 48), cc.DIRECTOR_STATS_POSITION));
-        this._SPFLabel.setPosition(cc.pAdd(cc.p(20, 30), cc.DIRECTOR_STATS_POSITION));
-        this._FPSLabel.setPosition(cc.pAdd(cc.p(20, 10), cc.DIRECTOR_STATS_POSITION));
-    },
-
-    _calculateMPF:function () {
+    _calculateMPF:function(){
         var now = cc.Time.gettimeofdayCocos2d();
 
         this._secondsPerFrame = (now.tv_sec - this._lastUpdate.tv_sec) + (now.tv_usec - this._lastUpdate.tv_usec) / 1000000.0;
     }
 });
+
 
 
 /***************************************************
@@ -1221,7 +1223,7 @@ cc.firstUseDirector = true;
  * @return {cc.Director}
  */
 cc.Director.getInstance = function () {
-    if (cc.firstUseDirector) {
+    if(cc.firstUseDirector){
         cc.firstUseDirector = false;
         cc.s_SharedDirector = new cc.DisplayLinkDirector();
         cc.s_SharedDirector.init();
@@ -1244,7 +1246,7 @@ cc.defaultFPS = 60;
 /*
  window.onfocus = function () {
  if (!cc.firstRun) {
- cc.Director.getInstance().addRegionToDirtyRegion(cc.rect(0, 0, cc.canvas.width, cc.canvas.height));
+ cc.Director.getInstance().addRegionToDirtyRegion(new cc.Rect(0, 0, cc.canvas.width, cc.canvas.height));
  }
  };
  */

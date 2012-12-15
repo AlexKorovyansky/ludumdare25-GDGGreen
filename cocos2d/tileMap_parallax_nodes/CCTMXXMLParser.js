@@ -85,32 +85,31 @@ cc.TMXPropertyTile = 5;
  * @constant
  * @type Number
  */
-cc.TMX_TILE_HORIZONTAL_FLAG = 0x80000000;
-
-
-/**
- * @constant
- * @type Number
- */
-cc.TMX_TILE_VERTICAL_FLAG = 0x40000000;
+cc.TMXTileHorizontalFlag = 0x80000000;
 
 /**
  * @constant
  * @type Number
  */
-cc.TMX_TILE_DIAGONAL_FLAG = 0x20000000;
+cc.TMXTileVerticalFlag = 0x40000000;
 
 /**
  * @constant
  * @type Number
  */
-cc.TMX_TILE_ALL_FLAGS = (cc.TMX_TILE_HORIZONTAL_FLAG | cc.TMX_TILE_VERTICAL_FLAG | cc.TMX_TILE_DIAGONAL_FLAG) >>> 0;
+cc.TMXTileDiagonalFlag = 0x20000000;
 
 /**
  * @constant
  * @type Number
  */
-cc.TMX_TILE_ALL_FLAGS_MASK = (~(cc.TMX_TILE_ALL_FLAGS)) >>> 0;
+cc.FlipedAll = (cc.TMXTileHorizontalFlag | cc.TMXTileVerticalFlag | cc.TMXTileDiagonalFlag)>>>0;
+
+/**
+ * @constant
+ * @type Number
+ */
+cc.FlippedMask = (~(cc.FlipedAll))>>>0;
 
 // Bits on the far end of the 32-bit global tile ID (GID's) are used for tile flags
 
@@ -136,9 +135,9 @@ cc.TMXLayerInfo = cc.Class.extend(/** @lends cc.TMXLayerInfo# */{
     _minGID:100000,
     _maxGID:0,
     offset:cc.PointZero(),
-    ctor:function () {
-        this._properties = [];
-    },
+    ctor:function(){
+        this._properties =[];
+     },
     /**
      * @return {Array}
      */
@@ -207,11 +206,11 @@ cc.TMXTilesetInfo = cc.Class.extend(/** @lends cc.TMXTilesetInfo# */{
     rectForGID:function (gid) {
         var rect = cc.RectZero();
         rect.size = this._tileSize;
-        gid &= cc.TMX_TILE_ALL_FLAGS_MASK;
-        gid = gid - parseInt(this.firstGid,10);
-        var max_x = parseInt((this.imageSize.width - this.margin * 2 + this.spacing) / (this._tileSize.width + this.spacing),10);
-        rect.origin.x = parseInt((gid % max_x) * (this._tileSize.width + this.spacing) + this.margin,10);
-        rect.origin.y = parseInt(parseInt(gid / max_x,10) * (this._tileSize.height + this.spacing) + this.margin,10);
+        gid &= cc.FlippedMask;
+        gid = gid - parseInt(this.firstGid);
+        var max_x = parseInt((this.imageSize.width - this.margin * 2 + this.spacing) / (this._tileSize.width + this.spacing));
+        rect.origin.x = parseInt((gid % max_x) * (this._tileSize.width + this.spacing) + this.margin);
+        rect.origin.y = parseInt(parseInt(gid / max_x) * (this._tileSize.height + this.spacing) + this.margin);
         return rect;
     }
 });
@@ -425,7 +424,7 @@ cc.TMXMapInfo = cc.SAXParser.extend(/** @lends cc.TMXMapInfo# */{
      * @param {String} tmxFile
      * @return {String}
      */
-    initWithTMXFile:function (tmxFile, resourcePath) {
+    initWithTMXFile:function (tmxFile,resourcePath) {
         this._internalInit(tmxFile, resourcePath);
         return this.parseXMLFile(this._TMXFileName);
     },
@@ -435,7 +434,7 @@ cc.TMXMapInfo = cc.SAXParser.extend(/** @lends cc.TMXMapInfo# */{
      * @return {Element}
      */
     parseXMLFile:function (tmxFile) {
-        var mapXML = cc.SAXParser.getInstance().tmxParse(tmxFile);
+        var mapXML = cc.SAXParser.shareParser().tmxParse(tmxFile);
 
         // PARSE <map>
         var map = mapXML.documentElement;
@@ -457,21 +456,21 @@ cc.TMXMapInfo = cc.SAXParser.extend(/** @lends cc.TMXMapInfo# */{
             else if (orientationStr !== null)
                 cc.log("cocos2d: TMXFomat: Unsupported orientation:" + this.getOrientation());
 
-            var s = cc.size(0, 0);
+            var s = new cc.Size();
             s.width = parseFloat(map.getAttribute('width'));
             s.height = parseFloat(map.getAttribute('height'));
             this.setMapSize(s);
 
-            s = cc.size(0, 0);
+            s = new cc.Size();
             s.width = parseFloat(map.getAttribute('tilewidth'));
             s.height = parseFloat(map.getAttribute('tileheight'));
             this.setTileSize(s)
 
             // The parent element is the map
             var mp = map.querySelectorAll("map > properties >  property");
-            if (mp) {
-                for (var k = 0; k < mp.length; k++) {
-                    var dict = {};
+            if(mp){
+                for(var k = 0; k < mp.length;k++){
+                    var dict ={};
                     var name = mp[k].getAttribute('name');
                     var value = mp[k].getAttribute('value');
                     dict[name] = value;
@@ -502,7 +501,7 @@ cc.TMXMapInfo = cc.SAXParser.extend(/** @lends cc.TMXMapInfo# */{
                 tileset.spacing = parseInt(t.getAttribute('spacing')) || 0;
                 tileset.margin = parseInt(t.getAttribute('margin')) || 0;
 
-                var s = cc.size(0, 0);
+                var s = new cc.Size();
                 s.width = parseFloat(t.getAttribute('tilewidth'));
                 s.height = parseFloat(t.getAttribute('tileheight'));
                 tileset._tileSize = s;
@@ -510,10 +509,10 @@ cc.TMXMapInfo = cc.SAXParser.extend(/** @lends cc.TMXMapInfo# */{
                 var image = t.getElementsByTagName('image')[0];
                 var imgSource = image.getAttribute('source');
                 if (imgSource) {
-                    if (this._resources) {
+                    if(this._resources){
                         imgSource = this._resources + "/" + imgSource;
                     }
-                    else {
+                    else{
                         imgSource = cc.FileUtils.getInstance().fullPathFromRelativeFile(imgSource, tmxFile);
                     }
                 }
@@ -531,8 +530,8 @@ cc.TMXMapInfo = cc.SAXParser.extend(/** @lends cc.TMXMapInfo# */{
                 this.setParentGID(parseInt(info.firstGid) + parseInt(t.getAttribute('id') || 0));
                 var tp = t.querySelectorAll("properties > property")[0];
 
-                if (tp) {
-                    var dict = {};
+                if(tp){
+                    var dict ={};
                     var name = tp.getAttribute('name');
                     var value = tp.getAttribute('value');
                     dict[name] = value;
@@ -551,7 +550,7 @@ cc.TMXMapInfo = cc.SAXParser.extend(/** @lends cc.TMXMapInfo# */{
                 var layer = new cc.TMXLayerInfo();
                 layer.name = l.getAttribute('name');
 
-                var s = cc.size(0, 0);
+                var s = new cc.Size();
                 s.width = parseFloat(l.getAttribute('width'));
                 s.height = parseFloat(l.getAttribute('height'));
                 layer._layerSize = s;
@@ -591,10 +590,10 @@ cc.TMXMapInfo = cc.SAXParser.extend(/** @lends cc.TMXMapInfo# */{
                     // Uncompressed
                     case null:
                     case '':
-                        if (encoding == "base64") {
+                        if(encoding == "base64"){
                             layer._tiles = cc.Codec.Base64.decodeAsArray(nodeValue, 4);
                         }
-                        else {
+                        else{
                             layer._tiles = cc.StringToArray(nodeValue);
                         }
                         break;
@@ -604,9 +603,9 @@ cc.TMXMapInfo = cc.SAXParser.extend(/** @lends cc.TMXMapInfo# */{
 
                 // The parent element is the last layer
                 var lp = l.querySelectorAll("properties > property");
-                if (lp) {
-                    for (var k = 0; k < lp.length; k++) {
-                        var dict = {};
+                if(lp){
+                    for(var k = 0; k < lp.length;k++){
+                        var dict ={};
                         var name = lp[k].getAttribute('name');
                         var value = lp[k].getAttribute('value');
                         dict[name] = value;
@@ -627,15 +626,15 @@ cc.TMXMapInfo = cc.SAXParser.extend(/** @lends cc.TMXMapInfo# */{
                 var g = objectgroups[i];
                 var objectGroup = new cc.TMXObjectGroup();
                 objectGroup.setGroupName(g.getAttribute('name'));
-                var positionOffset = cc.p(0, 0);
+                var positionOffset = cc.p();
                 positionOffset.x = parseFloat(g.getAttribute('x')) * this.getTileSize().width || 0;
                 positionOffset.y = parseFloat(g.getAttribute('y')) * this.getTileSize().height || 0;
                 objectGroup.setPositionOffset(positionOffset);
 
                 var gp = g.querySelectorAll("objectgroup > properties > property");
-                if (gp) {
-                    for (var k = 0; k < gp.length; k++) {
-                        var dict = {};
+                if(gp){
+                    for(var k = 0; k < gp.length;k++){
+                        var dict ={};
                         var name = gp[k].getAttribute('name');
                         var value = gp[k].getAttribute('value');
                         dict[name] = value;
@@ -672,8 +671,8 @@ cc.TMXMapInfo = cc.SAXParser.extend(/** @lends cc.TMXMapInfo# */{
                         dict["y"] = y;
 
                         var op = o.querySelectorAll("properties > property");
-                        if (op) {
-                            for (var k = 0; k < op.length; k++) {
+                        if(op){
+                            for(var k = 0; k < op.length;k++){
                                 var name = op[k].getAttribute('name');
                                 var value = op[k].getAttribute('value');
                                 dict[name] = value;
@@ -764,7 +763,7 @@ cc.TMXMapInfo = cc.SAXParser.extend(/** @lends cc.TMXMapInfo# */{
  */
 cc.TMXMapInfo.create = function (tmxFile, resourcePath) {
     var ret = new cc.TMXMapInfo();
-    if (ret.initWithTMXFile(tmxFile, resourcePath)) {
+    if (ret.initWithTMXFile(tmxFile,resourcePath)) {
         return ret;
     }
     return null;

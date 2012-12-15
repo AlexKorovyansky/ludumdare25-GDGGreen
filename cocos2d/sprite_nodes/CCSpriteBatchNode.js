@@ -25,6 +25,17 @@
  ****************************************************************************/
 
 
+/**
+ * @constant
+ * @type Number
+ */
+cc.GL_SRC_ALPHA = 0x0302;
+
+/**
+ * @constant
+ * @type Number
+ */
+cc.GL_ONE_MINUS_SRC_ALPHA = 0x0303;
 
 /**
  * @constant
@@ -69,12 +80,12 @@ cc.SpriteBatchNode = cc.Node.extend(/** @lends cc.SpriteBatchNode# */{
     ctor:function (fileImage) {
         this._super();
         if (fileImage) {
-            this.init(fileImage, cc.DEFAULT_SPRITE_BATCH_CAPACITY);
+            this.initWithFile(fileImage, cc.DEFAULT_SPRITE_BATCH_CAPACITY);
         }
         this._renderTexture = cc.RenderTexture.create(cc.canvas.width, cc.canvas.height);
-        this.setContentSize(cc.size(cc.canvas.width, cc.canvas.height));
+        this.setContentSize(new cc.Size(cc.canvas.width, cc.canvas.height));
     },
-    setContentSize:function (size) {
+    setContentSize:function(size){
         if (!size) {
             return;
         }
@@ -84,8 +95,8 @@ cc.SpriteBatchNode = cc.Node.extend(/** @lends cc.SpriteBatchNode# */{
     },
     _updateBlendFunc:function () {
         if (!this._textureAtlas.getTexture().hasPremultipliedAlpha()) {
-            this._blendFunc.src = gl.SRC_ALPHA;
-            this._blendFunc.dst = gl.ONE_MINUS_SRC_ALPHA;
+            this._blendFunc.src = cc.GL_SRC_ALPHA;
+            this._blendFunc.dst = cc.GL_ONE_MINUS_SRC_ALPHA;
         }
     },
 
@@ -302,14 +313,14 @@ cc.SpriteBatchNode = cc.Node.extend(/** @lends cc.SpriteBatchNode# */{
      */
     setNodeDirty:function () {
         this._setNodeDirtyForCache();
-        this._transformDirty = this._inverseDirty = true;
+        this._isTransformDirty = this._isInverseDirty = true;
         if (cc.NODE_TRANSFORM_USING_AFFINE_MATRIX) {
-            this._transformGLDirty = true;
+            this._isTransformGLDirty = true;
         }
     },
 
     _setNodeDirtyForCache:function () {
-        this._cacheDirty = true;
+        this._isCacheDirty = true;
     },
 
     /**
@@ -322,11 +333,16 @@ cc.SpriteBatchNode = cc.Node.extend(/** @lends cc.SpriteBatchNode# */{
      * @param {Number} capacity
      * @return {Boolean}
      */
-    init:function (fileImage, capacity) {
+    initWithFile:function (fileImage, capacity) {
         var texture2D = cc.TextureCache.getInstance().textureForKey(fileImage);
         if (!texture2D)
             texture2D = cc.TextureCache.getInstance().addImage(fileImage);
         return this.initWithTexture(texture2D, capacity);
+    },
+
+    init:function () {
+        var texture = new cc.Texture2D();
+        return this.initWithTexture(texture, 0);
     },
 
     /**
@@ -606,14 +622,10 @@ cc.SpriteBatchNode = cc.Node.extend(/** @lends cc.SpriteBatchNode# */{
 
     /**
      * set the source blending function for the texture
-     * @param {Number} src
-     * @param {Number} dst
+     * @param {cc.BlendFunc} blendFunc
      */
-    setBlendFunc:function (src, dst) {
-        if(arguments.length == 1)
-            this._blendFunc = src;
-        else
-            this._blendFunc = {src:src, dst:dst};
+    setBlendFunc:function (blendFunc) {
+        this._blendFunc = blendFunc;
     },
 
     /**
@@ -633,18 +645,18 @@ cc.SpriteBatchNode = cc.Node.extend(/** @lends cc.SpriteBatchNode# */{
         if (cc.renderContextType == cc.CANVAS) {
             var context = ctx || cc.renderContext;
             // quick return if not visible
-            if (!this._visible) {
+            if (!this._isVisible) {
                 return;
             }
             context.save();
             this.transform(ctx);
             var i;
             if (this._isUseCache) {
-                if (this._cacheDirty) {
+                if (this._isCacheDirty) {
                     //add dirty region
                     this._renderTexture.clear();
                     this._renderTexture.context.save();
-                    this._renderTexture.context.translate(this._anchorPointInPoints.x, -(this._anchorPointInPoints.y ));
+                    this._renderTexture.context.translate(this._anchorPointInPoints.x , -(this._anchorPointInPoints.y ));
                     if (this._children) {
                         this.sortAllChildren();
                         for (i = 0; i < this._children.length; i++) {
@@ -654,7 +666,7 @@ cc.SpriteBatchNode = cc.Node.extend(/** @lends cc.SpriteBatchNode# */{
                         }
                     }
                     this._renderTexture.context.restore();
-                    this._cacheDirty = false;
+                    this._isCacheDirty = false;
                 }
                 // draw RenderTexture
                 this.draw(ctx);
@@ -680,7 +692,7 @@ cc.SpriteBatchNode = cc.Node.extend(/** @lends cc.SpriteBatchNode# */{
             // The alternative is to have a void CCSprite#visit, but
             // although this is less mantainable, is faster
             //
-            if (!this._visible) {
+            if (!this._isVisible) {
                 return;
             }
 
@@ -744,7 +756,7 @@ cc.SpriteBatchNode = cc.Node.extend(/** @lends cc.SpriteBatchNode# */{
                 break;
         }
 
-        //this._addDirtyRegionToDirector(this.getBoundingBoxToWorld());
+        //this._addDirtyRegionToDirector(this.boundingBoxToWorld());
         this.setNodeDirty();
     },
 
@@ -763,13 +775,13 @@ cc.SpriteBatchNode = cc.Node.extend(/** @lends cc.SpriteBatchNode# */{
         }
 
         //save dirty region when before change
-        //this._addDirtyRegionToDirector(this.getBoundingBoxToWorld());
+        //this._addDirtyRegionToDirector(this.boundingBoxToWorld());
 
         //set the z-order and sort later
         this._super(child, zOrder);
 
         //save dirty region when after changed
-        //this._addDirtyRegionToDirector(this.getBoundingBoxToWorld());
+        //this._addDirtyRegionToDirector(this.boundingBoxToWorld());
         this.setNodeDirty();
     },
 
@@ -793,10 +805,10 @@ cc.SpriteBatchNode = cc.Node.extend(/** @lends cc.SpriteBatchNode# */{
 
     /**
      * <p>Removes all children from the container and do a cleanup all running actions depending on the cleanup parameter. <br/>
-     * (override removeAllChildren of cc.Node)</p>
+     * (override removeAllChildrenWithCleanup of cc.Node)</p>
      * @param {Boolean} cleanup
      */
-    removeAllChildren:function (cleanup) {
+    removeAllChildrenWithCleanup:function (cleanup) {
         // Invalidate atlas index. issue #569
         // useSelfRender should be performed on all descendants. issue #1216
         var i;
@@ -903,7 +915,7 @@ cc.SpriteBatchNode.create = function (fileImage, capacity) {
     }
 
     var batchNode = new cc.SpriteBatchNode();
-    batchNode.init(fileImage, capacity);
+    batchNode.initWithFile(fileImage, capacity);
 
     return batchNode;
 };

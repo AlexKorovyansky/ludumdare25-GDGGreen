@@ -31,6 +31,7 @@
  */
 
 cc.ActionEase = cc.ActionInterval.extend(/** @lends cc.ActionEase# */{
+
     /** initializes the action
      * @param {cc.ActionInterval} action
      * @return {Boolean}
@@ -44,13 +45,20 @@ cc.ActionEase = cc.ActionInterval.extend(/** @lends cc.ActionEase# */{
         }
         return false;
     },
+    /**
+     * @deprecated It is not needed anymore.
+     * @param zone
+     */
+    copyWithZone:function (zone) {
+
+    },
 
     /**
      * @param {cc.Node} target
      */
     startWithTarget:function (target) {
-        cc.ActionInterval.prototype.startWithTarget.call(this, target);
-        this._other.startWithTarget(this._target);
+        this._super(target);
+        this._other.startWithTarget(this._target);   //TODO, need to be checked
     },
 
     /**
@@ -129,6 +137,14 @@ cc.EaseRateAction = cc.ActionEase.extend(/** @lends cc.EaseRateAction# */{
     },
 
     /**
+     * @deprecated It is not needed anymore.
+     * @param zone
+     */
+    copyWithZone:function (zone) {
+
+    },
+
+    /**
      * @return {cc.ActionInterval}
      */
     reverse:function () {
@@ -150,6 +166,7 @@ cc.EaseRateAction.create = function (action, rate) {
     var ret = new cc.EaseRateAction();
     if (ret) {
         ret.initWithAction(action, rate);
+
     }
     return ret;
 };
@@ -172,6 +189,14 @@ cc.EaseIn = cc.EaseRateAction.extend(/** @lends cc.EaseIn# */{
      */
     reverse:function () {
         return cc.EaseIn.create(this._other.reverse(), 1 / this._rate);
+    },
+
+    /**
+     * @deprecated It is not needed anymore.
+     * @param zone
+     */
+    copyWithZone:function (zone) {
+
     }
 });
 
@@ -187,6 +212,7 @@ cc.EaseIn.create = function (action, rate) {
     var ret = new cc.EaseIn();
     if (ret) {
         ret.initWithAction(action, rate);
+
     }
     return ret;
 };
@@ -196,6 +222,7 @@ cc.EaseIn.create = function (action, rate) {
  * @extends cc.EaseRateAction
  */
 cc.EaseOut = cc.EaseRateAction.extend(/** @lends cc.EaseOut# */{
+
     /**
      * @param {Number} time1
      */
@@ -208,7 +235,17 @@ cc.EaseOut = cc.EaseRateAction.extend(/** @lends cc.EaseOut# */{
      */
     reverse:function () {
         return cc.EaseOut.create(this._other.reverse(), 1 / this._rate);
+    },
+
+    /**
+     * @deprecated It is not needed anymore.
+     * @param zone
+     */
+    copyWithZone:function (zone) {
+
     }
+
+
 });
 
 /** Creates the action with the inner action and the rate parameter
@@ -223,6 +260,7 @@ cc.EaseOut.create = function (action, rate) {
     var ret = new cc.EaseOut();
     if (ret) {
         ret.initWithAction(action, rate);
+
     }
     return ret;
 };
@@ -247,11 +285,22 @@ cc.EaseInOut = cc.EaseRateAction.extend(/** @lends cc.EaseInOut# */{
     },
 
     /**
+     * @deprecated It is not needed anymore.
+     * @param zone
+     */
+    copyWithZone:function (zone) {
+
+    },
+
+    /**
      * @return {cc.ActionInterval}
      */
     reverse:function () {
         return cc.EaseInOut.create(this._other.reverse(), this._rate);
+
     }
+
+
 });
 
 /** Creates the action with the inner action and the rate parameter
@@ -266,6 +315,7 @@ cc.EaseInOut.create = function (action, rate) {
     var ret = new cc.EaseInOut();
     if (ret) {
         ret.initWithAction(action, rate);
+
     }
     return ret;
 };
@@ -275,11 +325,13 @@ cc.EaseInOut.create = function (action, rate) {
  * @extends cc.ActionEase
  */
 cc.EaseExponentialIn = cc.ActionEase.extend(/** @lends cc.EaseExponentialIn# */{
+
     /**
      * @param {Number} time1
      */
     update:function (time1) {
-        this._other.update(time1 == 0 ? 0 : Math.pow(2, 10 * (time1 - 1)) - 0.001);
+        this._other.update(time1 == 0 ? 0 : Math.pow(2, 10 * (time1 / 1 - 1)) - 1 * 0.001);
+
     },
 
     /**
@@ -287,7 +339,16 @@ cc.EaseExponentialIn = cc.ActionEase.extend(/** @lends cc.EaseExponentialIn# */{
      */
     reverse:function () {
         return cc.EaseExponentialOut.create(this._other.reverse());
+    },
+    /**
+     * @deprecated It is not needed anymore.
+     * @param zone
+     */
+    copyWithZone:function (zone) {
+
     }
+
+
 });
 
 /** creates the action
@@ -301,6 +362,7 @@ cc.EaseExponentialIn.create = function (action) {
     var ret = new cc.EaseExponentialIn();
     if (ret) {
         ret.initWithAction(action);
+
     }
     return ret;
 };
@@ -315,7 +377,7 @@ cc.EaseExponentialOut = cc.ActionEase.extend(/** @lends cc.EaseExponentialOut# *
      * @param {Number} time1
      */
     update:function (time1) {
-        this._other.update(time1 == 1 ? 1 : (-(Math.pow(2, -10 * time1 )) + 1));
+        this._other.update(time1 == 1 ? 1 : (-(Math.pow(2, -10 * time1 / 1)) + 1));
     },
 
     /**
@@ -323,7 +385,17 @@ cc.EaseExponentialOut = cc.ActionEase.extend(/** @lends cc.EaseExponentialOut# *
      */
     reverse:function () {
         return cc.EaseExponentialIn.create(this._other.reverse());
+    },
+    /**
+     * @deprecated It is not needed anymore.
+     * @param zone
+     */
+    copyWithZone:function (zone) {
+
     }
+
+
+
 });
 
 /** creates the action
@@ -337,27 +409,30 @@ cc.EaseExponentialOut.create = function (action) {
     var ret = new cc.EaseExponentialOut();
     if (ret) {
         ret.initWithAction(action);
+
     }
     return ret;
 };
-
 /**
  * Ease Exponential InOut
  * @class
  * @extends cc.ActionEase
  */
 cc.EaseExponentialInOut = cc.ActionEase.extend(/** @lends cc.EaseExponentialInOut# */{
-    /**
-     * @param {Number} time
-     */
-    update:function (time) {
-        time /= 0.5;
-        if (time < 1)
-            time = 0.5 * Math.pow(2, 10 * (time - 1));
-        else
-            time = 0.5 * (-Math.pow(2, -10 * (time - 1)) + 2);
 
-        this._other.update(time);
+    /**
+     * @param {Number} time1
+     */
+    update:function (time1) {
+        time1 /= 0.5;
+        if (time1 < 1) {
+            time1 = 0.5 * Math.pow(2, 10 * (time1 - 1));
+        } else {
+            time1 = 0.5 * (-Math.pow(2, 10 * (time1 - 1)) + 2);
+        }
+
+        this._other.update(time1);
+
     },
 
     /**
@@ -365,8 +440,18 @@ cc.EaseExponentialInOut = cc.ActionEase.extend(/** @lends cc.EaseExponentialInOu
      */
     reverse:function () {
         return cc.EaseExponentialInOut.create(this._other.reverse());
+    },
+
+    /**
+     * @deprecated It is not needed anymore.
+     * @param zone
+     */
+    copyWithZone:function (zone) {
+
     }
+
 });
+
 
 /** creates the action
  * @param {cc.ActionInterval} action
@@ -379,6 +464,7 @@ cc.EaseExponentialInOut.create = function (action) {
     var ret = new cc.EaseExponentialInOut();
     if (ret) {
         ret.initWithAction(action);
+
     }
     return ret;
 };
@@ -402,6 +488,14 @@ cc.EaseSineIn = cc.ActionEase.extend(/** @lends cc.EaseSineIn# */{
      */
     reverse:function () {
         return cc.EaseSineOut.create(this._other.reverse());
+    },
+
+    /**
+     * @deprecated It is not needed anymore.
+     * @param zone
+     */
+    copyWithZone:function (zone) {
+
     }
 });
 
@@ -416,6 +510,7 @@ cc.EaseSineIn.create = function (action) {
     var ret = new cc.EaseSineIn();
     if (ret) {
         ret.initWithAction(action);
+
     }
     return ret;
 };
@@ -437,6 +532,14 @@ cc.EaseSineOut = cc.ActionEase.extend(/** @lends cc.EaseSineOut# */{
      */
     reverse:function () {
         return cc.EaseSineIn.create(this._other.reverse());
+    },
+
+    /**
+     * @deprecated It is not needed anymore.
+     * @param zone
+     */
+    copyWithZone:function (zone) {
+
     }
 });
 
@@ -452,6 +555,7 @@ cc.EaseSineOut.create = function (action) {
     var ret = new cc.EaseSineOut();
     if (ret) {
         ret.initWithAction(action);
+
     }
     return ret;
 };
@@ -477,7 +581,16 @@ cc.EaseSineInOut = cc.ActionEase.extend(/** @lends cc.EaseSineInOut# */{
      */
     reverse:function () {
         return cc.EaseSineInOut.create(this._other.reverse());
+    },
+
+    /**
+     * @deprecated It is not needed anymore.
+     * @param zone
+     */
+    copyWithZone:function (zone) {
+
     }
+
 });
 
 /** creates the action
@@ -491,6 +604,7 @@ cc.EaseSineInOut.create = function (action) {
     var ret = new cc.EaseSineInOut();
     if (ret) {
         ret.initWithAction(action);
+
     }
     return ret;
 };
@@ -532,7 +646,16 @@ cc.EaseElastic = cc.ActionEase.extend(/** @lends cc.EaseElastic# */{
      */
     reverse:function () {
         cc.Assert(0, "Override me");
+
         return null;
+    },
+
+    /**
+     * @deprecated It is not needed anymore.
+     * @param zone
+     */
+    copyWithZone:function (zone) {
+
     },
 
     _period:null
@@ -554,6 +677,7 @@ cc.EaseElastic.create = function (action, period) {
         } else {
             ret.initWithAction(action, period);
         }
+
     }
     return ret;
 };
@@ -587,7 +711,16 @@ cc.EaseElasticIn = cc.EaseElastic.extend(/** @lends cc.EaseElasticIn# */{
      */
     reverse:function () {
         return cc.EaseElasticOut.create(this._other.reverse(), this._period);
+    },
+
+    /**
+     * @deprecated It is not needed anymore.
+     * @param zone
+     */
+    copyWithZone:function (zone) {
+
     }
+
 });
 
 
@@ -607,6 +740,7 @@ cc.EaseElasticIn.create = function (action, period) {
         } else {
             ret.initWithAction(action, period);
         }
+
     }
     return ret;
 };
@@ -631,6 +765,7 @@ cc.EaseElasticOut = cc.EaseElastic.extend(/** @lends cc.EaseElasticOut# */{
         }
 
         this._other.update(newT);
+
     },
 
     /**
@@ -638,7 +773,17 @@ cc.EaseElasticOut = cc.EaseElastic.extend(/** @lends cc.EaseElasticOut# */{
      */
     reverse:function () {
         return cc.EaseElasticIn.create(this._other.reverse(), this._period);
+    },
+
+    /**
+     * @deprecated It is not needed anymore.
+     * @param zone
+     */
+    copyWithZone:function (zone) {
+
     }
+
+
 });
 
 
@@ -658,6 +803,7 @@ cc.EaseElasticOut.create = function (action, period) {
         } else {
             ret.initWithAction(action, period);
         }
+
     }
     return ret;
 };
@@ -693,6 +839,7 @@ cc.EaseElasticInOut = cc.EaseElastic.extend(/** @lends cc.EaseElasticInOut# */{
         }
 
         this._other.update(newT);
+
     },
 
     /**
@@ -700,7 +847,16 @@ cc.EaseElasticInOut = cc.EaseElastic.extend(/** @lends cc.EaseElasticInOut# */{
      */
     reverse:function () {
         return cc.EaseInOut.create(this._other.reverse(), this._period);
+    },
+
+    /**
+     * @deprecated It is not needed anymore.
+     * @param zone
+     */
+    copyWithZone:function (zone) {
+
     }
+
 });
 
 /** Creates the action with the inner action and the period in radians (default is 0.3)
@@ -719,6 +875,7 @@ cc.EaseElasticInOut.create = function (action, period) {
         } else {
             ret.initWithAction(action, period);
         }
+
     }
     return ret;
 };
@@ -753,7 +910,16 @@ cc.EaseBounce = cc.ActionEase.extend(/** @lends cc.EaseBounce# */{
      */
     reverse:function () {
         return cc.EaseBounce.create(this._other.reverse());
+    },
+
+    /**
+     * @deprecated It is not needed anymore.
+     * @param zone
+     */
+    copyWithZone:function (zone) {
+
     }
+
 });
 
 /** creates the action
@@ -791,7 +957,17 @@ cc.EaseBounceIn = cc.EaseBounce.extend(/** @lends cc.EaseBounceIn# */{
      */
     reverse:function () {
         return cc.EaseBounceOut.create(this._other.reverse());
+    },
+
+    /**
+     * @deprecated It is not needed anymore.
+     * @param zone
+     */
+    copyWithZone:function (zone) {
+
     }
+
+
 });
 
 /** creates the action
@@ -829,7 +1005,17 @@ cc.EaseBounceOut = cc.EaseBounce.extend(/** @lends cc.EaseBounceOut# */{
      */
     reverse:function () {
         return cc.EaseBounceIn.create(this._other.reverse());
+    },
+
+    /**
+     * @deprecated It is not needed anymore.
+     * @param zone
+     */
+    copyWithZone:function (zone) {
+
     }
+
+
 });
 
 /** creates the action
@@ -868,15 +1054,25 @@ cc.EaseBounceInOut = cc.EaseBounce.extend(/** @lends cc.EaseBounceInOut# */{
         }
 
         this._other.update(newT);
+
     },
 
 
     /**
      * @return {cc.ActionInterval}
      */
-    reverse:function () {
+    reverse:function(){
         return cc.EaseBounceInOut.create(this._other.reverse());
+    },
+
+    /**
+     * @deprecated It is not needed anymore.
+     * @param zone
+     */
+    copyWithZone:function (zone) {
+
     }
+
 });
 
 /** creates the action
@@ -917,7 +1113,16 @@ cc.EaseBackIn = cc.ActionEase.extend(/** @lends cc.EaseBackIn# */{
     reverse:function () {
         return cc.EaseBackOut.create(this._other.reverse());
 
+    },
+
+    /**
+     * @deprecated It is not needed anymore.
+     * @param zone
+     */
+    copyWithZone:function (zone) {
+
     }
+
 });
 
 
@@ -958,6 +1163,14 @@ cc.EaseBackOut = cc.ActionEase.extend(/** @lends cc.EaseBackOut# */{
      */
     reverse:function () {
         return cc.EaseBackIn.create(this._other.reverse());
+    },
+
+    /**
+     * @deprecated It is not needed anymore.
+     * @param zone
+     */
+    copyWithZone:function (zone) {
+
     }
 });
 
@@ -1001,9 +1214,18 @@ cc.EaseBackInOut = cc.ActionEase.extend(/** @lends cc.EaseBackInOut# */{
     /**
      * @return {cc.ActionInterval}
      */
-    reverse:function () {
+    reverse:function(){
         return cc.EaseBackInOut.create(this._other.reverse());
+    },
+
+    /**
+     * @deprecated It is not needed anymore.
+     * @param zone
+     */
+    copyWithZone:function (zone) {
+
     }
+
 });
 
 

@@ -76,11 +76,10 @@ cc.MotionStreak = cc.Node.extend(/** @lends cc.MotionStreak# */{
     },
 
     /**
-     * @param {Number} src
-     * @param {Number} dst
+     * @param {cc.BlendFunc} blendFunc
      */
-    setBlendFunc:function (src, dst) {
-        this._ribbon.setBlendFunc(src, dst);
+    setBlendFunc:function (blendFunc) {
+        this._ribbon.setBlendFunc(blendFunc);
     },
 
     /**

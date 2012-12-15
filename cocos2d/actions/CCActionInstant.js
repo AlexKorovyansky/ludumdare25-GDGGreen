@@ -278,12 +278,12 @@ cc.Place.create = function (pos) {
  */
 cc.CallFunc = cc.ActionInstant.extend(/** @lends cc.CallFunc# */{
     /**
-     * @param {function|Null} selector
      * @param {object} selectorTarget
+     * @param {function|Null} selector
      * @param {*|Null} data data for function, it accepts all data types.
      * @return {Boolean}
      */
-    initWithTarget:function (selector, selectorTarget, data) {
+    initWithTarget:function (selectorTarget, selector, data) {
         this._data = data || null;
         this._callFunc = selector || null;
         this._selectorTarget = selectorTarget || null;
@@ -326,32 +326,26 @@ cc.CallFunc = cc.ActionInstant.extend(/** @lends cc.CallFunc# */{
             this._selectorTarget = sel;
         }
     },
-
-    copy:function() {
-        var n = new cc.CallFunc();
-        n.initWithTarget(this._callFunc,  this._selectorTarget, this._data );
-        return n;
-    },
     _selectorTarget:null,
     _callFunc:null
 });
 /** creates the action with the callback
- * @param {function|Null} selector
  * @param {object} selectorTarget
+ * @param {function|Null} selector
  * @param {*|Null} data data for function, it accepts all data types.
  * @return {cc.CallFunc}
  * @example
  * // example
  * // CallFunc without data
- * var finish = cc.CallFunc.create(this.removeSprite, this);
+ * var finish = cc.CallFunc.create(this, this.removeSprite);
  *
  * // CallFunc with data
- * var finish = cc.CallFunc.create(this.removeFromParentAndCleanup, this._grossini,  true),
+ * var finish = cc.CallFunc.create(this._grossini, this.removeFromParentAndCleanup, true),
  */
 
-cc.CallFunc.create = function (selector, selectorTarget, data) {
+cc.CallFunc.create = function (selectorTarget, selector, data) {
     var ret = new cc.CallFunc();
-    if (ret && ret.initWithTarget(selector, selectorTarget, data)) {
+    if (ret && ret.initWithTarget(selectorTarget, selector, data)) {
         ret._callFunc = selector;
         return ret;
     }

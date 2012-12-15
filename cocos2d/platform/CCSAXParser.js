@@ -53,11 +53,11 @@ cc.SAXParser = cc.Class.extend(/** @lends cc.SAXParser# */{
             this.xmlDoc.loadXML(textxml);
         }
         if (this.xmlDoc == null) {
-            cc.log("cocos2d:xml " + this.xmlDoc + " not found!");
+            cc.log("xml " + this.xmlDoc + " not found!");
         }
         var plist = this.xmlDoc.documentElement;
         if (plist.tagName != 'plist') {
-            throw "cocos2d:Not a plist file"
+            throw "Not a plist file"
         }
         // Get first real node
         var node = null;
@@ -89,7 +89,7 @@ cc.SAXParser = cc.Class.extend(/** @lends cc.SAXParser# */{
             this.xmlDoc.loadXML(textxml);
         }
         if (this.xmlDoc == null) {
-            cc.log("cocos2d:xml " + this.xmlDoc + " not found!");
+            cc.log("xml " + this.xmlDoc + " not found!");
         }
         return this.xmlDoc;
     },
@@ -104,14 +104,12 @@ cc.SAXParser = cc.Class.extend(/** @lends cc.SAXParser# */{
                 data = this._parseArray(node);
                 break;
             case 'string':
-                if (node.childNodes.length == 1) {
+                // FIXME - This needs to handle Firefox's 4KB nodeValue limit
+                if(node.firstChild != null) { //DVFIX
                     data = node.firstChild.nodeValue;
-                } else {
-                    //handle Firefox's 4KB nodeValue limit
+                }
+                else {
                     data = "";
-                    for (var i = 0; i < node.childNodes.length; i++) {
-                        data += node.childNodes[i].nodeValue;
-                    }
                 }
                 break;
             case 'false':
@@ -169,8 +167,6 @@ cc.SAXParser = cc.Class.extend(/** @lends cc.SAXParser# */{
      * @param {String} filePath
      */
     preloadPlist:function (filePath) {
-        filePath = cc.FileUtils.getInstance().fullPathFromRelativePath(filePath);
-
         if (window.XMLHttpRequest) {
             // for IE7+, Firefox, Chrome, Opera, Safari brower
             var xmlhttp = new XMLHttpRequest();
@@ -182,23 +178,13 @@ cc.SAXParser = cc.Class.extend(/** @lends cc.SAXParser# */{
             xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
         }
         if (xmlhttp != null) {
-            var that = this;
-            xmlhttp.onreadystatechange = function () {
-                if (xmlhttp.readyState == 4) {
-                    if (xmlhttp.responseText) {
-                        cc.Loader.getInstance().onResLoaded();
-                        that.xmlList[filePath] = xmlhttp.responseText;
-                        xmlhttp = null;
-                    } else {
-                        cc.Assert("cocos2d:There was a problem retrieving the xml data:" + xmlhttp.statusText);
-                    }
-                }
-            };
             // load xml
-            xmlhttp.open("GET", filePath, true);
+            xmlhttp.open("GET", filePath, false);
             xmlhttp.send(null);
+            this.xmlList[filePath] = xmlhttp.responseText;
+            cc.Loader.shareLoader().onResLoaded();
         } else {
-            cc.Assert("cocos2d:Your browser does not support XMLHTTP.");
+            alert("Your browser does not support XMLHTTP.");
         }
     },
 
@@ -242,11 +228,9 @@ cc.SAXParser = cc.Class.extend(/** @lends cc.SAXParser# */{
  * @function
  * @return {cc.SAXParser}
  */
-cc.SAXParser.getInstance = function () {
-    if (!this._instance) {
-        this._instance = new cc.SAXParser();
+cc.SAXParser.shareParser = function () {
+    if (!cc.shareParser) {
+        cc.shareParser = new cc.SAXParser();
     }
-    return this._instance;
+    return cc.shareParser;
 };
-
-cc.SAXParser._instance = null;

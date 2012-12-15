@@ -58,8 +58,12 @@ cc.PARTICLE_DEFAULT_CAPACITY = 100;
 cc.ParticleBatchNode = cc.Node.extend(/** @lends cc.ParticleBatchNode# */{
     TextureProtocol:true,
     //the blend function used for drawing the quads
-    _blendFunc:{src:cc.BLEND_SRC, dst:cc.BLEND_DST},
+    _blendFunc:new cc.BlendFunc(cc.BLEND_SRC, cc.BLEND_DST),
     _textureAtlas:null,
+
+    ctor:function () {
+
+    },
 
     /**
      * initializes the particle system with cc.Texture2D, a capacity of particles
@@ -112,8 +116,7 @@ cc.ParticleBatchNode = cc.Node.extend(/** @lends cc.ParticleBatchNode# */{
                 cc.Assert(child.getTexture() == this._textureAtlas.getTexture(), "cc.ParticleSystem is not using the same texture id");
                 // If this is the 1st children, then copy blending function
                 if (this._children.length == 0) {
-                    var blend = child.getBlendFunc();
-                    this.setBlendFunc(blend.src, blend.dst);
+                    this.setBlendFunc(child.getBlendFunc());
                 }
 
                 cc.Assert(this._blendFunc.src == child.getBlendFunc().src && this._blendFunc.dst == pChild.getBlendFunc().dst,
@@ -255,7 +258,7 @@ cc.ParticleBatchNode = cc.Node.extend(/** @lends cc.ParticleBatchNode# */{
     /**
      * @param {Boolean} doCleanup
      */
-    removeAllChildren:function (doCleanup) {
+    removeAllChildrenWithCleanup:function (doCleanup) {
         for (var i = 0; i < this._children.length; i++) {
             this._children[i].setBatchNode(null);
         }
@@ -273,10 +276,6 @@ cc.ParticleBatchNode = cc.Node.extend(/** @lends cc.ParticleBatchNode# */{
             quad.tl.vertices.x = quad.tl.vertices.y = quad.bl.vertices.x = quad.bl.vertices.y = 0.0;
     },
 
-    /**
-     * @override
-     * @param {CanvasContext} ctx
-     */
     draw:function (ctx) {
         cc.PROFILER_STOP("CCParticleBatchNode - draw");
         if (this._textureAtlas.getTotalQuads() == 0) {
@@ -308,22 +307,14 @@ cc.ParticleBatchNode = cc.Node.extend(/** @lends cc.ParticleBatchNode# */{
         this._textureAtlas.setTexture(texture);
 
         // If the new texture has No premultiplied alpha, AND the blendFunc hasn't been changed, then update it
-        if (texture && !texture.hasPremultipliedAlpha() && ( m_tBlendFunc.src == gl.BLEND_SRC && m_tBlendFunc.dst == gl.BLEND_DST )) {
-            this._blendFunc.src = gl.SRC_ALPHA;
-            this._blendFunc.dst = gl.ONE_MINUS_SRC_ALPHA;
+        if (texture && !texture.hasPremultipliedAlpha() && ( m_tBlendFunc.src == CC_BLEND_SRC && m_tBlendFunc.dst == CC_BLEND_DST )) {
+            m_tBlendFunc.src = GL_SRC_ALPHA;
+            m_tBlendFunc.dst = GL_ONE_MINUS_SRC_ALPHA;
         }
     },
 
-    /**
-     * set the blending function used for the texture
-     * @param {Number} src
-     * @param {Number} dst
-     */
-    setBlendFunc:function (src, dst) {
-        if(arguments.length == 1)
-            this._blendFunc = src;
-        else
-            this._blendFunc = {src:src, dst:dst};
+    setBlendFunc:function (blendFunc) {
+        m_tBlendFunc = blendFunc;
     },
 
     /**
@@ -344,7 +335,7 @@ cc.ParticleBatchNode = cc.Node.extend(/** @lends cc.ParticleBatchNode# */{
         // The alternative is to have a void cc.Sprite#visit, but
         // although this is less mantainable, is faster
         //
-        if (!this._visible) {
+        if (!this._isVisible) {
             return;
         }
 
@@ -457,7 +448,7 @@ cc.ParticleBatchNode = cc.Node.extend(/** @lends cc.ParticleBatchNode# */{
 
         child.setParent(this);
 
-        if (this._running) {
+        if (this._isRunning) {
             child.onEnter();
             child.onEnterTransitionDidFinish();
         }
@@ -466,8 +457,8 @@ cc.ParticleBatchNode = cc.Node.extend(/** @lends cc.ParticleBatchNode# */{
 
     _updateBlendFunc:function () {
         if (!this._textureAtlas.getTexture().hasPremultipliedAlpha()) {
-            this._blendFunc.src = gl.SRC_ALPHA;
-            this._blendFunc.dst = gl.ONE_MINUS_SRC_ALPHA;
+            m_tBlendFunc.src = GL_SRC_ALPHA;
+            m_tBlendFunc.dst = GL_ONE_MINUS_SRC_ALPHA;
         }
     },
 
