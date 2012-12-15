@@ -37,6 +37,7 @@
         appFiles:[
             'game/src/Resource.js',
             // 'box2d/GB2ShapeCache.js',
+            'game/src/Cat.js',
             'game/src/GameLayer.js',
         ]
     };

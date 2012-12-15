@@ -8,13 +8,20 @@ var GameLayer = cc.Layer.extend({
 
 		this.screenSize = cc.Director.getInstance().getWinSize();
 
-        this.background = cc.Sprite.create("game/res/back.png");
-        this.background.setPosition(cc.p(this.screenSize.width / 2, this.screenSize.height / 2));
-        this.background.setVisible(true);
-        this.background.setAnchorPoint(cc.p(0.5, 0.5));
-        this.background.setScale(1);
-        this.background.setRotation(0);
-        this.addChild(this.background, 0);
+        this.map = cc.Sprite.create("game/res/back.png");
+        this.map.setPosition(cc.p(this.screenSize.width / 2, this.screenSize.height / 2));
+        this.map.setVisible(true);
+        this.map.setAnchorPoint(cc.p(0.5, 0.5));
+        this.map.setScale(1);
+        this.map.setRotation(0);
+        this.addChild(this.map, 0);
+
+        this.setTouchEnabled(true);
+        // this.setKeyboardEnabled(true);
+
+        this.cat = new Cat();
+        this.cat.setPosition(cc.p(this.screenSize.width / 2, this.screenSize.height / 2));
+        this.addChild(this.cat);
 
         // this.sprite = cc.Sprite.create("game/res/objects.png");
         // this.sprite.setPosition(cc.p(this.screenSize.width / 2, this.screenSize.height / 2));
@@ -26,8 +33,17 @@ var GameLayer = cc.Layer.extend({
 
 		return true;
 	},
-
-
+    onTouchesEnded: function(ptouch, evt){
+        var location = ptouch[0].getLocation();
+        this.cat.setPosition(location);
+        // console.log("move")
+    },
+    onMouseDown: function(evt){
+        this.cat.setPosition(cc.p(evt.x, evt.y));
+    },
+    onMouseMoved: function(evt){
+        console.log("move")
+    }
 });
 
 GameLayer.create = function () {
