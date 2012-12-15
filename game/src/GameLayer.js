@@ -17,7 +17,6 @@ var GameLayer = cc.Layer.extend({
         this.addChild(this.map, 0);
 
         this.setTouchEnabled(true);
-        // this.setKeyboardEnabled(true);
 
         this.cat = new Cat();
         this.cat.setPosition(cc.p(this.screenSize.width / 2, this.screenSize.height / 2));
