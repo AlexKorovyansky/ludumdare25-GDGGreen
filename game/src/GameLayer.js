@@ -21,7 +21,7 @@ var GameLayer = cc.Layer.extend({
         this.setTouchEnabled(true);
 
         this.pee = new Pee('game/res/armchair_before.png', 'game/res/armchair_after.png', 2);
-        this.pee.setPosition(cc.p(this.screenSize.width / 3, this.screenSize.height / 3));
+        this.pee.setPosition(cc.p(this.screenSize.width * 5 / 6, this.screenSize.height / 3));
         this.pee.setAnchorPoint(cc.p(0.5, 0.5));
         this.addChild(this.pee);
         this._pees.push(this.pee);
