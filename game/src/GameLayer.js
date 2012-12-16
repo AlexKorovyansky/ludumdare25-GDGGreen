@@ -107,7 +107,7 @@ var GameLayer = cc.Layer.extend({
 		var scene = cc.Scene.create();
         scene.addChild(FinalScene.create());
         // scene.addChild(GameControlMenu.create());
-        cc.AudioEngine.getInstance().playEffect(meow_effect, true);
+        cc.AudioEngine.getInstance().playEffect(meow_effect, false);
         cc.Director.getInstance().replaceScene(cc.TransitionFade.create(1.2, scene));
 
     },
