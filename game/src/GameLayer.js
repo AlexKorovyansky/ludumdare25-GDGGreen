@@ -32,6 +32,7 @@ var GameLayer = cc.Layer.extend({
         this.cat.setPosition(cc.p(this.screenSize.width / 2, this.screenSize.height / 2));
         this.addChild(this.cat);
 
+        this.scheduleUpdate();
 		return true;
 	},
     onTouchesEnded: function(ptouch, evt){
@@ -39,67 +40,29 @@ var GameLayer = cc.Layer.extend({
 
         this.cat.handleTouch(location);
     },
-    checkForAndResolveCollisions:function (cat) {
-        var position = cat.getPosition()
+    checkForAndResolveCollisions:function(cat) {
+        var position = cat.getPosition();
 
         for (var i = 0, pees_length = this._pees.length; i < pees_length; i++) {
             var pee = this._pees[i];
-            var catRect = cat.collisionBoundingBox();
+            var cat = this.cat;
+            var catRect = cc.RectMake(parseFloat(cat.getPositionX()), parseFloat(cat.getPositionY()), cat.getContentSize().width, cat.getContentSize().height);
 
-            var peeRect = cc.RectMake(parseFloat(pee["x"]), parseFloat(pee["y"]), this.map.getTileSize().width, this.map.getTileSize().height);
+            var peeRect = cc.RectMake(parseFloat(pee.getPositionX()), parseFloat(pee.getPositionY()), pee.getContentSize().width, pee.getContentSize().height);
 
-                if (cc.rectIntersectsRect(pRect, tileRect)) {
-                    var intersection = cc.rectIntersection(pRect, tileRect);
-                    var tileIndx = cc.ArrayGetIndexOfObject(tiles, dic);
+            if (cc.Rect.CCRectIntersectsRect(catRect, peeRect)) {
+                // var intersection = cc.Rect.CCRectIntersection(catRect, peeRect);
+                var tileIndx = cc.ArrayGetIndexOfObject(this._pees, pee);
 
-                    if (tileIndx == 0) {
-                        //tile is directly below player
-                        p.desiredPosition = cc.PointMake(p.desiredPosition.x, p.desiredPosition.y + intersection.size.height);
-                        p.velocity = cc.PointMake(p.velocity.x, 0.0);
-                        p.onGround = true;
-                    } 
-                    else if (tileIndx == 1) {
-                        //tile is directly above player
-                        p.desiredPosition = cc.PointMake(p.desiredPosition.x, p.desiredPosition.y - intersection.size.height);
-                        p.velocity = cc.PointMake(p.velocity.x, 0.0);
-                    } 
-                    else if (tileIndx == 2) {
-                        //tile is left of player
-                        p.desiredPosition = cc.PointMake(p.desiredPosition.x + intersection.size.width, p.desiredPosition.y);
-                    } 
-                    else if (tileIndx == 3) {
-                        //tile is right of player
-                        p.desiredPosition = cc.PointMake(p.desiredPosition.x - intersection.size.width, p.desiredPosition.y);
-                    } 
-                    else {
-                        if (intersection.size.width > intersection.size.height) {
-                            //tile is diagonal, but resolving collision vertially
-                            p.velocity = cc.PointMake(p.velocity.x, 0.0);
-                            var resolutionHeight;
-                            if (tileIndx > 5) {
-                                resolutionHeight = -intersection.size.height;
-                                p.onGround = true;
-                            } else {
-                                resolutionHeight = intersection.size.height;
-                            }                        
-                            p.desiredPosition = cc.PointMake(p.desiredPosition.x, p.desiredPosition.y + resolutionHeight );
-                        
-                        } 
-                        else {
-                            var resolutionWidth;
-                            if (tileIndx == 6 || tileIndx == 4) {
-                                resolutionWidth = intersection.size.width;
-                            } 
-                            else {
-                                resolutionWidth = -intersection.size.width;
-                            }
-                            p.desiredPosition = cc.PointMake(p.desiredPosition.x + resolutionWidth , p.desiredPosition.y);
-                        } 
-                    }  
-                }
-            }  
+                this.pee.setState(true);
+            }
+            else {
+                this.pee.setState(false);   
+            }
         }
-        p.setPosition(p.desiredPosition); //8
+    },
+    update:function(dt){
+        this.checkForAndResolveCollisions(this.cat)
     }
 });
 
