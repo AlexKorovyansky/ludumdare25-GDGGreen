@@ -41,7 +41,7 @@ var Host = cc.Sprite.extend({
         	if(this.sinceLastCatch > 1){
         		this.sinceLastCatch = 0;
         		this.stopAllActions();
-            var time = uu.timeMP(this.getPosition(), 100 + this._angryLevel * this._angryLevel * 0.00001, cat.getPosition());
+            var time = uu.timeMP(this.getPosition(), 100 + this._angryLevel * this._angryLevel * 0.001, cat.getPosition());
             this.setFlipX(this.getPositionX() > cat.getPositionX());
         		this.runAction(cc.MoveTo.create(time, cat.getPosition()));
         	}
