@@ -22,7 +22,6 @@ var GameLayer = cc.Layer.extend({
 
         this.host = new Host();
         this.host.setPosition(cc.p(this.screenSize.width - 90, this.screenSize.height - 60));
-        // this.host.setVisible(false);
         this.addChild(this.host);
 
         this.pee = new Pee('game/res/box.png', 'game/res/host_man.png');
@@ -46,16 +45,18 @@ var GameLayer = cc.Layer.extend({
     checkForAndResolveCollisions:function(cat) {
         var cat = this.cat
           , host = this.host
-          , catRect = cc.RectMake(parseFloat(cat.getPositionX()), parseFloat(cat.getPositionY()), cat.getContentSize().width, cat.getContentSize().height)
-          , hostRect = cc.RectMake(parseFloat(host.getPositionX()), parseFloat(host.getPositionY()), host.getContentSize().width, host.getContentSize().height);
+          , catRect = cc.RectMake(parseFloat(cat.getPositionX()), parseFloat(cat.getPositionY()), cat.getContentSize().width * cat.getScale(), cat.getContentSize().height * cat.getScale())
+          , hostRect = cc.RectMake(parseFloat(host.getPositionX()), parseFloat(host.getPositionY()), host.getContentSize().width * host.getScale(), host.getContentSize().height * host.getScale());
+        console.log(catRect);
+        console.log(hostRect);
         if (cc.Rect.CCRectIntersectsRect(catRect, hostRect)) {
             this._state = LOOSE;
         }
         for (var i = 0, pees_length = this._pees.length; i < pees_length; i++) {
             var pee = this._pees[i];    
-            var catRect = cc.RectMake(parseFloat(cat.getPositionX()), parseFloat(cat.getPositionY()), cat.getContentSize().width, cat.getContentSize().height);
+            var catRect = cc.RectMake(parseFloat(cat.getPositionX()), parseFloat(cat.getPositionY()), cat.getContentSize().width * cat.getScale(), cat.getContentSize().height * cat.getScale());
 
-            var peeRect = cc.RectMake(parseFloat(pee.getPositionX()), parseFloat(pee.getPositionY()), pee.getContentSize().width, pee.getContentSize().height);
+            var peeRect = cc.RectMake(parseFloat(pee.getPositionX()), parseFloat(pee.getPositionY()), pee.getContentSize().width * pee.getScale(), pee.getContentSize().height * pee.getScale());
 
             if (cc.Rect.CCRectIntersectsRect(catRect, peeRect)) {
                 // var intersection = cc.Rect.CCRectIntersection(catRect, peeRect);
@@ -76,8 +77,7 @@ var GameLayer = cc.Layer.extend({
         else {
             this.checkForAndResolveCollisions(this.cat);
             if (this.host.getAngryLevel() != 0){
-                // this.host.setVisible(true);
-                // this.host.runAction(cc.FadeIn.create(0.2));
+                // this.host.runAction(new cc.FadeIn.create(0.1));
                 this.host.catchCat(this.cat, dt);
             }
         }
