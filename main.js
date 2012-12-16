@@ -41,8 +41,22 @@ var cocos2dApp = cc.Application.extend({
         };
         cc.Loader.getInstance().preload([
             {type:"image", src:"game/res/about.png"},
+            {type:"image", src:"game/res/room.png"},
+            {type:"image", src:"game/res/start.png"},
+            {type:"image", src:"game/res/progress.png"},
             {type:"image", src:"game/res/armchair_after.png"},
-            {type:"image", src:"game/res/armchair_before.png"}
+            {type:"image", src:"game/res/armchair_before.png"},
+            {type:"image", src:"game/res/host_right.png"},
+            {type:"image", src:"game/res/cat_right.png"},
+            {type:"image", src:"game/res/tv_before.png"},
+            {type:"image", src:"game/res/tv_after.png"},
+            {type:"image", src:"game/res/fish_before.png"},
+            {type:"image", src:"game/res/fish_after.png"},
+            {type:"image", src:"game/res/flower_before.png"},
+            {type:"image", src:"game/res/flower_after.png"},
+            {type:"image", src:"game/res/boots_before.png"},
+            {type:"image", src:"game/res/boots_after.png"}
+
         ]);
         // cc.Loader.shareLoader().preload(g_ressources);
     },

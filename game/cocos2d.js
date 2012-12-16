@@ -30,21 +30,21 @@
         menuType:'canvas', //whether to use canvas mode menu or dom menu
         COCOS2D_DEBUG:2, //0 to turn debug off, 1 for basic debug, and 2 for full debug
         box2d:false,
-        showFPS:true,
+        showFPS:false,
         frameRate:60,
         tag:'gameCanvas', //the dom element to run cocos2d on
         engineDir:'cocos2d/',
         appFiles:[
             'game/src/Resource.js',
-            'game/src/Cat.js',
-            'game/src/Pee.js',
-            'game/src/Host.js',
-            'game/src/GameLayer.js',
             'game/src/StartScene.js',
+            'game/src/GameLayer.js',
             'game/src/FinalScene.js',
             'game/src/AboutScene.js',
             'game/src/WinScene.js',
             'game/src/AngerBar.js',
+            'game/src/Cat.js',
+            'game/src/Pee.js',
+            'game/src/Host.js',
             'game/src/HackUtils.js'
         ]
     };

@@ -2,7 +2,7 @@
 var StartScene = cc.Layer.extend({
 	screenSize:null,
     _startscene:null,
-	init:function () {
+	init:function(avoidMusic) {
 		this._super();
 
 		this.screenSize = cc.Director.getInstance().getWinSize();
@@ -18,9 +18,10 @@ var StartScene = cc.Layer.extend({
         gameOverLabel.setColor(new cc.Color3B(255,255,255));
         this._startscene.addChild(gameOverLabel);
 
-
-        cc.AudioEngine.getInstance().setMusicVolume(1);
-        cc.AudioEngine.getInstance().playMusic(background_music, true);
+        if (!avoidMusic){
+            cc.AudioEngine.getInstance().setMusicVolume(1);
+            cc.AudioEngine.getInstance().playMusic(background_music, true);
+        }
 
         cc.MenuItemFont.setFontName("Chelsea Market");
 
@@ -50,13 +51,13 @@ var StartScene = cc.Layer.extend({
     }
 });
 
-// StartScene.create = function () {
-//     var sg = new StartScene();
-//     if (sg && sg.init()) {
-//         return sg;
-//     }
-//     return null;
-// };
+StartScene.create = function () {
+    var sg = new StartScene();
+    if (sg && sg.init(true)) {
+        return sg;
+    }
+    return null;
+};
 
 var GameScene = cc.Scene.extend({
     onEnter:function () {

@@ -21,8 +21,6 @@ var AngerBar = cc.Sprite.extend({
       this._progress += value;
     },
     isWin:function(){
-      console.log(this._progressMax);
-      console.log(this._progress);
       return this._progressMax - this._progress < 0.1
     },
     update:function(dt) {

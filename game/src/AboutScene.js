@@ -24,9 +24,10 @@ var AboutScene = cc.Layer.extend({
 
 		return true;
 	},
-    onMenu:function (pSender) {
+    onMenu: function() {
         var scene = cc.Scene.create();
         scene.addChild(StartScene.create());
+
         cc.Director.getInstance().replaceScene(cc.TransitionSlideInL.create(1.0, scene));
     }
 });
@@ -38,13 +39,3 @@ AboutScene.create = function () {
     }
     return null;
 };
-
-var GameScene = cc.Scene.extend({
-    onEnter:function () {
-        this._super();
-        var layer = new StartScene();
-        layer.setAnchorPoint(cc.PointZero());
-        layer.init();
-        this.addChild(layer);
-    }
-});

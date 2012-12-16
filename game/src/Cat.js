@@ -28,7 +28,6 @@ var Cat = cc.Sprite.extend({
       
       this.stopAllActions();
       var time = uu.timeMP(this.getPosition(), this._speed, touchLocation);
-      console.log(this._speed + " " + time);
       this.runAction( cc.MoveTo.create(time, touchLocation) );
     }
 });

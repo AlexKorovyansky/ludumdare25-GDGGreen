@@ -20,7 +20,7 @@ var Host = cc.Sprite.extend({
       this._angryLevel++;
       if(this._isActive == 0){
         this._isActive = 1;
-        var action = cc.Sequence.create(cc.FadeIn.create(0.5), cc.CallFunc.create(this, this.activate));
+        var action = cc.Sequence.create(cc.FadeIn.create(0.5), cc.CallFunc.create(this.activate, this));
         this.runAction(action);
       }
     },
