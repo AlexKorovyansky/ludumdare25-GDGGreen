@@ -7,16 +7,16 @@ var StartScene = cc.Layer.extend({
 
 		this.screenSize = cc.Director.getInstance().getWinSize();
 
-        this.startscene = cc.Sprite.create("game/res/startscene.png");
-        this.startscene.setPosition(cc.p(this.screenSize.width / 2, this.screenSize.height / 2));
-        this.startscene.setVisible(true);
-        this.startscene.setAnchorPoint(cc.p(0.5, 0.5));
-        this.addChild(this.startscene, 0);
-        //  var helloLabel = cc.LabelTTF.create("Hello world", "Arial", 30);
-        // helloLabel.setPosition(new cc.Point(s.width/2,s.height/2));
-        // helloLabel.setColor(new cc.Color3B(255,0,0));
-        // var rotationAmount = 0;
-        // var scale = 1;
+        this._startscene = cc.Sprite.create("game/res/startscene.png");
+        this._startscene.setPosition(cc.p(0, 0));
+        this._startscene.setVisible(true);
+        this._startscene.setAnchorPoint(cc.p(0, 0));
+        this.addChild(this._startscene, 0);
+        
+        var gameOverLabel = cc.LabelTTF.create("Catvillain", "Chelsea Market", 76);
+        gameOverLabel.setPosition(cc.p(this.screenSize.width / 2, this.screenSize.height / 2));
+        gameOverLabel.setColor(new cc.Color3B(255,255,255));
+        this._startscene.addChild(gameOverLabel);
 
         this.setTouchEnabled(true);
 

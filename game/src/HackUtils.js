@@ -1,3 +1,7 @@
+LOOSE = 2;
+WIN = 1;
+CALM = 0;
+
 uu = {
 	timeMP: function(ownPosition, ownSpeed, point){
 		var d = this.distance(ownPosition, point);

@@ -1,9 +1,9 @@
 
 var GameLayer = cc.Layer.extend({
 	screenSize:null,
-    map:null,
-    anger:0,
-    _pees:[],
+    map   :null,
+    _pees :[],
+    _state:0,
 	init:function () {
 		this._super();
 
@@ -20,7 +20,7 @@ var GameLayer = cc.Layer.extend({
         this.setTouchEnabled(true);
 
         this.host = new Host();
-        this.host.setPosition(cc.p(this.screenSize.width / 2, this.screenSize.height / 2));
+        this.host.setPosition(cc.p(this.screenSize.width, this.screenSize.height));
         this.addChild(this.host);
 
         this.pee = new Pee('game/res/back.png', 'game/res/host_man.png');
@@ -41,11 +41,15 @@ var GameLayer = cc.Layer.extend({
         this.cat.handleTouch(location);
     },
     checkForAndResolveCollisions:function(cat) {
-        var position = cat.getPosition();
-
+        var cat = this.cat
+          , host = this.host
+          , catRect = cc.RectMake(parseFloat(cat.getPositionX()), parseFloat(cat.getPositionY()), cat.getContentSize().width, cat.getContentSize().height)
+          , hostRect = cc.RectMake(parseFloat(host.getPositionX()), parseFloat(host.getPositionY()), host.getContentSize().width, host.getContentSize().height);
+        if (cc.Rect.CCRectIntersectsRect(catRect, hostRect)) {
+            this._state = LOOSE;
+        }
         for (var i = 0, pees_length = this._pees.length; i < pees_length; i++) {
-            var pee = this._pees[i];
-            var cat = this.cat;
+            var pee = this._pees[i];    
             var catRect = cc.RectMake(parseFloat(cat.getPositionX()), parseFloat(cat.getPositionY()), cat.getContentSize().width, cat.getContentSize().height);
 
             var peeRect = cc.RectMake(parseFloat(pee.getPositionX()), parseFloat(pee.getPositionY()), pee.getContentSize().width, pee.getContentSize().height);
@@ -55,6 +59,7 @@ var GameLayer = cc.Layer.extend({
                 var tileIndx = cc.ArrayGetIndexOfObject(this._pees, pee);
 
                 this.pee.setState(true);
+                this.host.increaseAngryLevel();
             }
             else {
                 this.pee.setState(false);   
@@ -62,8 +67,18 @@ var GameLayer = cc.Layer.extend({
         }
     },
     update:function(dt){
-        this.checkForAndResolveCollisions(this.cat);
-        this.host.catchCat(this.cat, dt);
+        if (this._state == LOOSE){
+            this.endScreen();
+        }
+        else {
+            this.checkForAndResolveCollisions(this.cat);
+            if (this.host.getAngryLevel() != 0){
+                this.host.catchCat(this.cat, dt);
+            }
+        }
+    },
+    endScreen:function(){
+
     }
 });
 

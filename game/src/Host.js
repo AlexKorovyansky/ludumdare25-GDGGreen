@@ -1,5 +1,6 @@
 var Host = cc.Sprite.extend({
     _radians:0,
+    _angryLevel:0,
     sinceLastCatch:0,
     ctor:function () {
         this._super();
@@ -8,6 +9,21 @@ var Host = cc.Sprite.extend({
     },
     update:function (dt) {
     	this.setRotation(this._radians);
+    },
+    getAngryLevel:function(){
+      return this._angryLevel;
+    },
+    increaseAngryLevel:function(){
+      this._angryLevel++; 
+    },
+    decreaseAngryLevel:function(){
+      this._angryLevel--;
+      if (this._angryLevel < 0){
+        this._angryLevel = 0;
+      }
+    },
+    setAngryLevel:function(level){
+      this._angryLevel = level; 
     },
     catchCat:function(cat, dt) {
     	this.sinceLastCatch += dt;
