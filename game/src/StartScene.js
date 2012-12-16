@@ -1,6 +1,7 @@
 
 var GameLayer = cc.Layer.extend({
 	screenSize:null,
+    _startscene,
     map:null,
     anger:0,
     _pees:[],
@@ -9,13 +10,16 @@ var GameLayer = cc.Layer.extend({
 
 		this.screenSize = cc.Director.getInstance().getWinSize();
 
-        this.map = cc.Sprite.create(image_game_background);
-        this.map.setPosition(cc.p(this.screenSize.width / 2, this.screenSize.height / 2));
-        this.map.setVisible(true);
-        this.map.setAnchorPoint(cc.p(0.5, 0.5));
-        this.map.setScale(1);
-        this.map.setRotation(0);
-        this.addChild(this.map, 0);
+        this.startscene = cc.Sprite.create("game/res/back.png");
+        this.startscene.setPosition(cc.p(this.screenSize.width / 2, this.screenSize.height / 2));
+        this.startscene.setVisible(true);
+        this.startscene.setAnchorPoint(cc.p(0.5, 0.5));
+        this.addChild(this.startscene, 0);
+         var helloLabel = cc.LabelTTF.create("Hello world", "Arial", 30);
+        helloLabel.setPosition(new cc.Point(s.width/2,s.height/2));
+        helloLabel.setColor(new cc.Color3B(255,0,0));
+        var rotationAmount = 0;
+        var scale = 1;
 
         this.setTouchEnabled(true);
 

@@ -2,12 +2,14 @@ var Pee = cc.Sprite.extend({
     _radians:0,
     _state:false,
     _disabled:false,
+    _stateProgress:100,
     _fileNameActive:null,
 
     ctor:function (fileName, fileNameActive) {
         this._super();
         this.fileNameActive = fileNameActive;
         this.initWithFile(fileName);
+        this.scheduleUpdate();
     },
     collisionBoundingBox:function () {
         var collisionBox = cc.rectInset(this.getBoundingBox(), 3, 0);
@@ -15,21 +17,19 @@ var Pee = cc.Sprite.extend({
         var returnBoundingBox = cc.rectOffset(collisionBox, diff.x, diff.y);
         return returnBoundingBox;
     },
-    update:function (dt) {
+    update:function(dt) {
       this.setRotation(this._radians);
 
-      if (this._state && !this._disabled) {
+      if (this._state && !this._disabled){
+        this._stateProgress -= 50 * dt;
+      }
+      if (this._state && !this._disabled && this._stateProgress <= 0) {
         this.initWithFile(this.fileNameActive);
         this._state = false;
         this._disabled = true;
       }
     },
-    setActiveState:function(){
-      this._state = true;
-    },
-    handleTouch:function(touchLocation)
-    {
-      this.setActiveState();
-      this.update();
+    setState:function(state){
+      this._state = state;
     }
 });
