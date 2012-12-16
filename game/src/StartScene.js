@@ -14,7 +14,7 @@ var StartScene = cc.Layer.extend({
         this.addChild(this._startscene, 0);
         
         var gameOverLabel = cc.LabelTTF.create("Catvillain", "Chelsea Market", 76);
-        gameOverLabel.setPosition(cc.p(this.screenSize.width / 2, this.screenSize.height / 2));
+        gameOverLabel.setPosition(cc.p(this.screenSize.width / 2, this.screenSize.height / 1.8));
         gameOverLabel.setColor(new cc.Color3B(255,255,255));
         this._startscene.addChild(gameOverLabel);
 
@@ -24,8 +24,8 @@ var StartScene = cc.Layer.extend({
         var menuItem2 = new cc.MenuItemFont.create("About", this, this.about);
 
         
-        menuItem1.setPosition(new cc.Point(this.screenSize.width / 2, this.screenSize.height / 3));
-        menuItem2.setPosition(new cc.Point(this.screenSize.width / 2, this.screenSize.height / 3 - 50));
+        menuItem1.setPosition(new cc.Point(this.screenSize.width / 2, this.screenSize.height / 2.4));
+        menuItem2.setPosition(new cc.Point(this.screenSize.width / 2, this.screenSize.height / 2.4 - 50));
 
         var menu = cc.Menu.create(menuItem1,menuItem2);
         menu.setPosition(new cc.Point(0,0));
