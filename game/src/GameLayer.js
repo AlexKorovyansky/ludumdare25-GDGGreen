@@ -59,6 +59,7 @@ var GameLayer = cc.Layer.extend({
 
                 pee.decreaseHealth(dt);
                 this.host.increaseAngryLevel();
+                this._pees[i] = pee;
             }
         }
     },
