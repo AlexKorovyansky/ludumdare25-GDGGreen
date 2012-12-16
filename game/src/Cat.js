@@ -4,7 +4,7 @@ var Cat = cc.Sprite.extend({
     _catched:false,
     ctor:function () {
         this._super();
-        this._speed = 300;
+        this._speed = 600;
         this.initWithFile('game/res/cat.png');
     },
     update:function(dt) {
@@ -26,6 +26,7 @@ var Cat = cc.Sprite.extend({
     {
       this.stopAllActions();
       var time = uu.timeMP(this.getPosition(), this._speed, touchLocation);
+      console.log(this._speed + " " + time);
       this.runAction( cc.MoveTo.create(time, touchLocation) );
     }
 });
