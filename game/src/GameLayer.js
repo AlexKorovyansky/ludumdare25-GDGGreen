@@ -62,7 +62,8 @@ var GameLayer = cc.Layer.extend({
         }
     },
     update:function(dt){
-        this.checkForAndResolveCollisions(this.cat)
+        this.checkForAndResolveCollisions(this.cat);
+        this.host.catchCat(this.cat, dt);
     }
 });
 
