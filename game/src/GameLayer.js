@@ -21,7 +21,8 @@ var GameLayer = cc.Layer.extend({
         this.setTouchEnabled(true);
 
         this.host = new Host();
-        this.host.setPosition(cc.p(this.screenSize.width, this.screenSize.height));
+        this.host.setPosition(cc.p(this.screenSize.width - 90, this.screenSize.height - 60));
+        // this.host.setVisible(false);
         this.addChild(this.host);
 
         this.pee = new Pee('game/res/box.png', 'game/res/host_man.png');
@@ -75,6 +76,8 @@ var GameLayer = cc.Layer.extend({
         else {
             this.checkForAndResolveCollisions(this.cat);
             if (this.host.getAngryLevel() != 0){
+                // this.host.setVisible(true);
+                // this.host.runAction(cc.FadeIn.create(0.2));
                 this.host.catchCat(this.cat, dt);
             }
         }
