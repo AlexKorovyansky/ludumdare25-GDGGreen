@@ -20,10 +20,7 @@ var GameLayer = cc.Layer.extend({
 
         this.setTouchEnabled(true);
 
-        this.pee = new Pee('game/res/armchair_before.png', 'game/res/armchair_after.png', 2);
-        this.pee.setPosition(cc.p(this.screenSize.width * 5 / 6, this.screenSize.height / 3));
-        this.addChild(this.pee);
-        this._pees.push(this.pee);
+        this.initPees();
 
         this.host = new Host();
         this.host.setPosition(cc.p(this.screenSize.width - 90, this.screenSize.height - 60));
@@ -60,7 +57,7 @@ var GameLayer = cc.Layer.extend({
                 // var intersection = cc.Rect.CCRectIntersection(catRect, peeRect);
                 var tileIndx = cc.ArrayGetIndexOfObject(this._pees, pee);
 
-                this.pee.decreaseHealth(dt);
+                pee.decreaseHealth(dt);
                 this.host.increaseAngryLevel();
             }
         }
@@ -79,6 +76,14 @@ var GameLayer = cc.Layer.extend({
     },
     endScreen:function(){
 
+    },
+    initPees:function(){
+        for(var i=0; i < pee_config.length; i++){
+            var pee_conf = pee_config[i];
+            var pee = new Pee(pee_conf);
+            this.addChild(pee);
+            this._pees.push(pee);
+        }
     }
 });
 

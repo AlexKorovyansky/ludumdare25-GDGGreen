@@ -5,12 +5,14 @@ var Pee = cc.Sprite.extend({
     _before:null,
     _after:null,
 
-    ctor:function (before, after, startHealthLevel) {
+    ctor:function (peeConf) {
         this._super();
-        this._before = before;
-        this._after = after;
-        this._healthLevel = startHealthLevel;
+        this._before = peeConf.before;
+        this._after = peeConf.after;
+        this._healthLevel = peeConf.level;
         this.initWithFile(this._before);
+        this.setPosition(cc.p(peeConf.x, peeConf.y));
+        this.setAnchorPoint(cc.p(0.5, 0.5));
     },
 
     decreaseHealth: function(dt){
