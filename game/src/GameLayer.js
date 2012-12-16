@@ -21,8 +21,7 @@ var GameLayer = cc.Layer.extend({
 
         this.setTouchEnabled(true);
 
-        this._pbar = new AngerBar()
-        this._pbar.setPosition(cc.p(30, 30));
+        this._pbar = new AngerBar();
         this.addChild(this._pbar);
         this._pbar.scheduleUpdate();
 
@@ -30,6 +29,7 @@ var GameLayer = cc.Layer.extend({
 
         this.host = new Host();
         this.host.setPosition(cc.p(this.screenSize.width - 90, this.screenSize.height - 60));
+        this.host.setAnchorPoint(cc.p(0.5, 0));
         this.addChild(this.host);
 
         this.cat = new Cat();
@@ -74,11 +74,11 @@ var GameLayer = cc.Layer.extend({
                 var tileIndx = cc.ArrayGetIndexOfObject(this._pees, pee);
 
                 pee.decreaseHealth(dt);
-                this._pbar.progress(dt);
                 this.host.increaseAngryLevel();
 
                 if (!pee.isEnabled()){
                     pee.setOpacity(190);
+                    this._pbar.progress(dt);
                 }
             }
             else {

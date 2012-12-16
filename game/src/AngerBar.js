@@ -6,7 +6,12 @@ var AngerBar = cc.Sprite.extend({
       this._super();
 
       this.initWithFile('game/res/transparent.png');
-      this._bar = cc.Sprite.create('game/res/cat_left.png');
+      this.setPosition(cc.p(60, 30));
+      this.setAnchorPoint(cc.p(1, 0));
+      this.setOpacity(190);
+      
+      this._bar = cc.Sprite.create('game/res/progress.png');
+      this._bar.setAnchorPoint(cc.p(0, 0));
       this.addChild(this._bar);
     },
     addMaxProgress:function(value){
