@@ -29,36 +29,17 @@ var cocos2dApp = cc.Application.extend({
     ctor:function (scene) {
         this._super();
         this.startScene = scene;
-        cc.COCOS2D_DEBUG = this.config['COCOS2D_DEBUG'];
+        cc.COCOS2D_DEBUG = this.config.COCOS2D_DEBUG;
         cc.initDebugSetting();
-        cc.setup(this.config['tag']);
-        cc.AudioEngine.getInstance().init("mp3,ogg");
+        cc.setup(this.config.tag);
+        // cc.AudioEngine.getInstance().init("mp3, ogg");
         cc.Loader.getInstance().onloading = function () {
             cc.LoaderScene.getInstance().draw();
         };
         cc.Loader.getInstance().onload = function () {
             cc.AppController.shareAppController().didFinishLaunchingWithOptions();
         };
-        cc.Loader.getInstance().preload([
-            {type:"image", src:"game/res/about.png"},
-            {type:"image", src:"game/res/room.png"},
-            {type:"image", src:"game/res/start.png"},
-            {type:"image", src:"game/res/progress.png"},
-            {type:"image", src:"game/res/armchair_after.png"},
-            {type:"image", src:"game/res/armchair_before.png"},
-            {type:"image", src:"game/res/host_right.png"},
-            {type:"image", src:"game/res/cat_right.png"},
-            {type:"image", src:"game/res/tv_before.png"},
-            {type:"image", src:"game/res/tv_after.png"},
-            {type:"image", src:"game/res/fish_before.png"},
-            {type:"image", src:"game/res/fish_after.png"},
-            {type:"image", src:"game/res/flower_before.png"},
-            {type:"image", src:"game/res/flower_after.png"},
-            {type:"image", src:"game/res/boots_before.png"},
-            {type:"image", src:"game/res/boots_after.png"}
-
-        ]);
-        // cc.Loader.shareLoader().preload(g_ressources);
+        cc.Loader.getInstance().preload(g_ressources);
     },
     applicationDidFinishLaunching:function () {
         // initialize director

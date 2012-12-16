@@ -1,7 +1,8 @@
 //plist
-var s_objects_plist = "game/res/objects.plist";
-var background_music = "game/res/sound/bg";
-var meow_effect = "game/res/sound/meow";
+// var s_objects_plist = "game/res/objects.plist";
+
+var background_music = "game/res/sound/bg.mp3";
+var meow_effect 		 = "game/res/sound/meow.mp3";
 var pee_config = [
 	{
 		before:"game/res/armchair_before.png",
@@ -41,12 +42,28 @@ var pee_config = [
 ];
 
 var g_ressources = [
-    //tmx
-    
+    //images
+    {type:"image", src:"game/res/about.png"},
+    {type:"image", src:"game/res/room.png"},
+    {type:"image", src:"game/res/start.png"},
+    {type:"image", src:"game/res/progress.png"},
+    {type:"image", src:"game/res/armchair_after.png"},
+    {type:"image", src:"game/res/armchair_before.png"},
+    {type:"image", src:"game/res/host_right.png"},
+    {type:"image", src:"game/res/cat_right.png"},
+    {type:"image", src:"game/res/tv_before.png"},
+    {type:"image", src:"game/res/tv_after.png"},
+    {type:"image", src:"game/res/fish_before.png"},
+    {type:"image", src:"game/res/fish_after.png"},
+    {type:"image", src:"game/res/flower_before.png"},
+    {type:"image", src:"game/res/flower_after.png"},
+    {type:"image", src:"game/res/boots_before.png"},
+    {type:"image", src:"game/res/boots_after.png"},
+
     //plist
-    {type:"plist", src:s_objects_plist},
+    // {type:"plist", src:s_objects_plist},
 
     //music
-    {type:"bgm", src:background_music},
-    {type:"effect", src:meow_effect}
+    {type:"sound", src:background_music},
+    {type:"sound", src:meow_effect}
 ];
