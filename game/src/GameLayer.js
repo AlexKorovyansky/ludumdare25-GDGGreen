@@ -21,7 +21,7 @@ var GameLayer = cc.Layer.extend({
         this.setTouchEnabled(true);
 
         this.pee = new Pee('game/res/armchair_before.png', 'game/res/armchair_after.png', 2);
-        this.pee.setPosition(cc.p(this.screenSize.width / 3, this.screenSize.height / 3));
+        this.pee.setPosition(cc.p(this.screenSize.width * 5 / 6, this.screenSize.height / 3));
         this.addChild(this.pee);
         this._pees.push(this.pee);
 
@@ -47,8 +47,6 @@ var GameLayer = cc.Layer.extend({
           , host = this.host
           , catRect = cc.RectMake(parseFloat(cat.getPositionX()), parseFloat(cat.getPositionY()), cat.getContentSize().width * cat.getScale(), cat.getContentSize().height * cat.getScale())
           , hostRect = cc.RectMake(parseFloat(host.getPositionX()), parseFloat(host.getPositionY()), host.getContentSize().width * host.getScale(), host.getContentSize().height * host.getScale());
-        console.log(catRect);
-        console.log(hostRect);
         if (cc.Rect.CCRectIntersectsRect(catRect, hostRect)) {
             this._state = LOOSE;
         }
