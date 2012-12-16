@@ -20,11 +20,8 @@ var AngerBar = cc.Sprite.extend({
     progress:function(value){
       this._progress += value;
     },
-    isWin:function(){
-      return this._progressMax - this._progress < 0.1
-    },
     update:function(dt) {
-      var scale = parseFloat(this._progress) / parseFloat(this._progressMax);
+      var scale = 2 * parseFloat(this._progress) / parseFloat(this._progressMax);
       this._bar.setScaleX(scale);
     }
 });

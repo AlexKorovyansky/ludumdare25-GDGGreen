@@ -23,7 +23,7 @@ var Pee = cc.Sprite.extend({
         }
     },
 
-    isEnabled: function(){
+    isDisabled: function(){
         return this._disabled;
     }
 });

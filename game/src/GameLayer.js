@@ -63,29 +63,38 @@ var GameLayer = cc.Layer.extend({
             this.cat.stopAllActions();
             this.host.stopAllActions();
         }
+        var isWin = true;
         for (var i = 0, pees_length = this._pees.length; i < pees_length; i++) {
             var pee = this._pees[i]
-              , isWin = true
               , catRect = cc.RectMake(parseFloat(cat.getPositionX()), parseFloat(cat.getPositionY()), catRectWidth, catRectHeight)
               , peeRectWidth = pee.getContentSize().width * pee.getScale() / 1.5
               , peeRectHeight = pee.getContentSize().height * pee.getScale() / 1.5
               , peeRect = cc.RectMake(parseFloat(pee.getPositionX()), parseFloat(pee.getPositionY()), peeRectWidth, peeRectHeight);
 
             if (cc.Rect.CCRectIntersectsRect(catRect, peeRect)) {
-                var tileIndx = cc.ArrayGetIndexOfObject(this._pees, pee);
+                // var tileIndx = cc.ArrayGetIndexOfObject(this._pees, pee);
+
+                this._state = GAME;
 
                 pee.decreaseHealth(dt);
                 this.host.increaseAngryLevel();
 
-                if (!pee.isEnabled()){
+                if (!pee.isDisabled()){
                     pee.setOpacity(190);
                     this._pbar.progress(dt);
-                    var isWin = false;
+                    isWin = false;
                 }
             }
             else {
                 pee.setOpacity(250);
+                if (!pee.isDisabled()){
+                    isWin = false;
+                }
             }
+        }
+        if (isWin && this._state == GAME){
+            this.winScreen();
+            this._state = CALM;
         }
     },
     update:function(dt){
@@ -100,10 +109,6 @@ var GameLayer = cc.Layer.extend({
             this.checkForAndResolveCollisions(dt);
             if (this.host.getAngryLevel() != 0){
                 this.host.catchCat(this.cat, dt);
-            }
-            if (this._pbar.isWin()){
-                this.winScreen();
-                this._state = CALM;
             }
         }
     },
