@@ -12,7 +12,7 @@ var GameLayer = cc.Layer.extend({
 
         this.map = cc.Sprite.create("game/res/room.png");
         this.map.setPosition(cc.p(this.screenSize.width / 2, this.screenSize.height / 2));
-        this.map.setVisible(true);
+        // this.map.setVisible(true);
         this.map.setAnchorPoint(cc.p(0.5, 0.5));
         this.map.setScale(1);
         this.map.setRotation(0);
@@ -77,7 +77,6 @@ var GameLayer = cc.Layer.extend({
         else {
             this.checkForAndResolveCollisions(this.cat);
             if (this.host.getAngryLevel() != 0){
-                // this.host.runAction(new cc.FadeIn.create(0.1));
                 this.host.catchCat(this.cat, dt);
             }
         }

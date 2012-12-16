@@ -2,6 +2,8 @@ var Host = cc.Sprite.extend({
     _radians:0,
     _angryLevel:0,
     sinceLastCatch:0,
+    _opacity:0,
+    _showState:false,
     ctor:function () {
         this._super();
         this.initWithFile('game/res/host_man.png');
