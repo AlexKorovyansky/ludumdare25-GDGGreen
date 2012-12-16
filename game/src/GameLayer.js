@@ -20,14 +20,14 @@ var GameLayer = cc.Layer.extend({
 
         this.setTouchEnabled(true);
 
-        this.host = new Host();
-        this.host.setPosition(cc.p(this.screenSize.width - 90, this.screenSize.height - 60));
-        this.addChild(this.host);
-
-        this.pee = new Pee('game/res/box.png', 'game/res/host_man.png');
+        this.pee = new Pee('game/res/armchair_before.png', 'game/res/armchair_after.png', 2);
         this.pee.setPosition(cc.p(this.screenSize.width / 3, this.screenSize.height / 3));
         this.addChild(this.pee);
         this._pees.push(this.pee);
+
+        this.host = new Host();
+        this.host.setPosition(cc.p(this.screenSize.width - 90, this.screenSize.height - 60));
+        this.addChild(this.host);
 
         this.cat = new Cat();
         this.cat.setPosition(cc.p(this.screenSize.width / 2, this.screenSize.height / 2));
@@ -42,7 +42,7 @@ var GameLayer = cc.Layer.extend({
             this.cat.handleTouch(location);
         }
     },
-    checkForAndResolveCollisions:function(cat) {
+    checkForAndResolveCollisions:function(dt) {
         var cat = this.cat
           , host = this.host
           , catRect = cc.RectMake(parseFloat(cat.getPositionX()), parseFloat(cat.getPositionY()), cat.getContentSize().width * cat.getScale(), cat.getContentSize().height * cat.getScale())
@@ -62,11 +62,8 @@ var GameLayer = cc.Layer.extend({
                 // var intersection = cc.Rect.CCRectIntersection(catRect, peeRect);
                 var tileIndx = cc.ArrayGetIndexOfObject(this._pees, pee);
 
-                this.pee.setState(true);
+                this.pee.decreaseHealth(dt);
                 this.host.increaseAngryLevel();
-            }
-            else {
-                this.pee.setState(false);   
             }
         }
     },
@@ -75,7 +72,7 @@ var GameLayer = cc.Layer.extend({
             this.endScreen();
         }
         else {
-            this.checkForAndResolveCollisions(this.cat);
+            this.checkForAndResolveCollisions(dt);
             if (this.host.getAngryLevel() != 0){
                 this.host.catchCat(this.cat, dt);
             }
