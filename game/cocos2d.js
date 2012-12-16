@@ -44,6 +44,7 @@
             'game/src/StartScene.js',
             'game/src/FinalScene.js',
             'game/src/AboutScene.js',
+            'game/src/WinScene.js',
             'game/src/AngerBar.js',
             'game/src/HackUtils.js'
         ]

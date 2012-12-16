@@ -28,7 +28,7 @@ var GameLayer = cc.Layer.extend({
         this.initPees();
 
         this.host = new Host();
-        this.host.setPosition(cc.p(this.screenSize.width - 90, this.screenSize.height - 60));
+        this.host.setPosition(cc.p(this.screenSize.width - 90, this.screenSize.height - 120));
         this.host.setAnchorPoint(cc.p(0.5, 0));
         this.addChild(this.host);
 
@@ -40,7 +40,7 @@ var GameLayer = cc.Layer.extend({
 		return true;
 	},
     onTouchesEnded: function(ptouch, evt){
-		if (this._state == LOOSE){
+		if (this._state == LOOSE || this._state == WIN){
             return;
         }
         var location = ptouch[0].getLocation();
@@ -65,6 +65,7 @@ var GameLayer = cc.Layer.extend({
         }
         for (var i = 0, pees_length = this._pees.length; i < pees_length; i++) {
             var pee = this._pees[i]
+              , isWin = true
               , catRect = cc.RectMake(parseFloat(cat.getPositionX()), parseFloat(cat.getPositionY()), catRectWidth, catRectHeight)
               , peeRectWidth = pee.getContentSize().width * pee.getScale() / 1.5
               , peeRectHeight = pee.getContentSize().height * pee.getScale() / 1.5
@@ -79,6 +80,7 @@ var GameLayer = cc.Layer.extend({
                 if (!pee.isEnabled()){
                     pee.setOpacity(190);
                     this._pbar.progress(dt);
+                    var isWin = false;
                 }
             }
             else {
@@ -95,6 +97,10 @@ var GameLayer = cc.Layer.extend({
             if (this.host.getAngryLevel() != 0){
                 this.host.catchCat(this.cat, dt);
             }
+            if (this._pbar.isWin()){
+                this.winScreen();
+                this._state = WIN;
+            }
         }
     },
     endScreen:function(){
@@ -104,6 +110,13 @@ var GameLayer = cc.Layer.extend({
         cc.AudioEngine.getInstance().playEffect(meow_effect, true);
         cc.Director.getInstance().replaceScene(cc.TransitionFade.create(1.2, scene));
 
+    },
+    winScreen:function(){
+        var scene = cc.Scene.create();
+        scene.addChild(WinScene.create());
+        // scene.addChild(GameControlMenu.create());
+        cc.AudioEngine.getInstance().playEffect(meow_effect, false);
+        cc.Director.getInstance().replaceScene(cc.TransitionFade.create(1.2, scene));
     },
     initPees:function(){
         for(var i = 0; i < pee_config.length; i++){
