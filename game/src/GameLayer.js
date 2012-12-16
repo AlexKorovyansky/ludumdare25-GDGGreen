@@ -106,7 +106,6 @@ var GameLayer = cc.Layer.extend({
     endScreen:function(){
 		var scene = cc.Scene.create();
         scene.addChild(FinalScene.create());
-        // scene.addChild(GameControlMenu.create());
         cc.AudioEngine.getInstance().playEffect(meow_effect, false);
         cc.Director.getInstance().replaceScene(cc.TransitionFade.create(1.2, scene));
 
@@ -114,7 +113,6 @@ var GameLayer = cc.Layer.extend({
     winScreen:function(){
         var scene = cc.Scene.create();
         scene.addChild(WinScene.create());
-        // scene.addChild(GameControlMenu.create());
         cc.AudioEngine.getInstance().playEffect(meow_effect, false);
         cc.Director.getInstance().replaceScene(cc.TransitionFade.create(1.2, scene));
     },
