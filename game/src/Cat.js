@@ -5,7 +5,7 @@ var Cat = cc.Sprite.extend({
     ctor:function () {
         this._super();
         this._speed = 600;
-        this.initWithFile('game/res/cat.png');
+        this.initWithFile('game/res/cat_right.png');
     },
     update:function(dt) {
       this.setRotation(this._radians);

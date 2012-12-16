@@ -20,14 +20,14 @@ var GameLayer = cc.Layer.extend({
 
         this.setTouchEnabled(true);
 
-        this.host = new Host();
-        this.host.setPosition(cc.p(this.screenSize.width - 90, this.screenSize.height - 60));
-        this.addChild(this.host);
-
         this.pee = new Pee('game/res/armchair_before.png', 'game/res/armchair_after.png', 2);
         this.pee.setPosition(cc.p(this.screenSize.width / 3, this.screenSize.height / 3));
         this.addChild(this.pee);
         this._pees.push(this.pee);
+
+        this.host = new Host();
+        this.host.setPosition(cc.p(this.screenSize.width - 90, this.screenSize.height - 60));
+        this.addChild(this.host);
 
         this.cat = new Cat();
         this.cat.setPosition(cc.p(this.screenSize.width / 2, this.screenSize.height / 2));

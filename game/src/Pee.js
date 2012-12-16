@@ -11,7 +11,6 @@ var Pee = cc.Sprite.extend({
         this._after = after;
         this._healthLevel = startHealthLevel;
         this.initWithFile(this._before);
-        this.setScale(0.5);
     },
 
     decreaseHealth: function(dt){
