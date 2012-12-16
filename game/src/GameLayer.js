@@ -27,7 +27,7 @@ var GameLayer = cc.Layer.extend({
         this.addChild(this.host);
 
         this.cat = new Cat();
-        this.cat.setPosition(cc.p(this.screenSize.width / 2, this.screenSize.height / 2));
+        this.cat.setPosition(cc.p(this.screenSize.width / 2 + 200, this.screenSize.height / 2 + 100));
         this.addChild(this.cat);
 
         this.scheduleUpdate();
