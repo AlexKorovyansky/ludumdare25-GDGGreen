@@ -9,6 +9,12 @@ var Pee = cc.Sprite.extend({
         this.fileNameActive = fileNameActive;
         this.initWithFile(fileName);
     },
+    collisionBoundingBox:function () {
+        var collisionBox = cc.rectInset(this.getBoundingBox(), 3, 0);
+        var diff = cc.pSub(this.desiredPosition, this.getPosition());
+        var returnBoundingBox = cc.rectOffset(collisionBox, diff.x, diff.y);
+        return returnBoundingBox;
+    },
     update:function (dt) {
       this.setRotation(this._radians);
 

@@ -6,6 +6,12 @@ var Cat = cc.Sprite.extend({
         this._speed = 300;
         this.initWithFile('game/res/cat.png');
     },
+    collisionBoundingBox:function () {
+        var collisionBox = cc.rectInset(this.getBoundingBox(), 3, 0);
+        var diff = cc.pSub(this.desiredPosition, this.getPosition());
+        var returnBoundingBox = cc.rectOffset(collisionBox, diff.x, diff.y);
+        return returnBoundingBox;
+    },
     update:function (dt) {
       this.setRotation(this._radians);
     },
