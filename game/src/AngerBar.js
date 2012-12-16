@@ -1,32 +1,22 @@
 var AngerBar = cc.Sprite.extend({
-    _radians:0,
-    _speed:0,
-    _catched:false,
+    _progressMax:0,
+    _progress:0,
+    _bar:null,
     ctor:function () {
-        this._super();
-        this._speed = 600;
-        this.initWithFile('game/res/cat_right.png');
+      this._super();
+
+      this.initWithFile('game/res/transparent.png');
+      this._bar = cc.Sprite.create('game/res/cat_left.png');
+      this.addChild(this._bar);
+    },
+    addMaxProgress:function(value){
+      this._progressMax += value;
+    },
+    progress:function(value){
+      this._progress += value;
     },
     update:function(dt) {
-      this.setRotation(this._radians);
-
-      if (this._catched){
-        this._stateProgress -= 50 * dt;
-      }
-      if (this._state && !this._disabled && this._stateProgress <= 0) {
-        this.initWithFile(this.fileNameActive);
-        this._state = false;
-        this._disabled = true;
-      }
-    },
-    setChatched:function(){
-      this._catched = true;
-    },
-    handleTouch:function(touchLocation)
-    {
-      this.stopAllActions();
-      var time = uu.timeMP(this.getPosition(), this._speed, touchLocation);
-      console.log(this._speed + " " + time);
-      this.runAction( cc.MoveTo.create(time, touchLocation) );
+      var scale = parseFloat(this._progress) / parseFloat(this._progressMax);
+      this._bar.setScaleX(scale);
     }
 });

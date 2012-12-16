@@ -5,6 +5,7 @@ var GameLayer = cc.Layer.extend({
     _pees:[],
     _state:0,
     _roomRect: cc.RectMake(37, 0, 726, 494),
+    _pbar:null,
 	init:function () {
 		this._super();
 
@@ -19,6 +20,11 @@ var GameLayer = cc.Layer.extend({
         this.addChild(this.map, 0);
 
         this.setTouchEnabled(true);
+
+        this._pbar = new AngerBar()
+        this._pbar.setPosition(cc.p(30, 30));
+        this.addChild(this._pbar);
+        this._pbar.scheduleUpdate();
 
         this.initPees();
 
@@ -68,6 +74,7 @@ var GameLayer = cc.Layer.extend({
                 var tileIndx = cc.ArrayGetIndexOfObject(this._pees, pee);
 
                 pee.decreaseHealth(dt);
+                this._pbar.progress(dt);
                 this.host.increaseAngryLevel();
 
                 if (!pee.isEnabled()){
@@ -98,11 +105,12 @@ var GameLayer = cc.Layer.extend({
 
     },
     initPees:function(){
-        for(var i=0; i < pee_config.length; i++){
+        for(var i = 0; i < pee_config.length; i++){
             var pee_conf = pee_config[i];
             var pee = new Pee(pee_conf);
             this.addChild(pee);
             this._pees.push(pee);
+            this._pbar.addMaxProgress(pee_conf.level);
         }
     }
 });
