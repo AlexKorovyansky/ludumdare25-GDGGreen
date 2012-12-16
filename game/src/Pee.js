@@ -21,5 +21,9 @@ var Pee = cc.Sprite.extend({
             this.initWithFile(this._after);
             this._disabled = true;
         }
+    },
+
+    isEnabled: function(){
+        return this._disabled;
     }
 });

@@ -42,6 +42,7 @@
             'game/src/Host.js',
             'game/src/GameLayer.js',
             'game/src/StartScene.js',
+            'game/src/FinalScene.js',
             'game/src/HackUtils.js'
         ]
     };
