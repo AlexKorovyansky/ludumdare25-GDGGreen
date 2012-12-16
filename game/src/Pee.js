@@ -12,6 +12,9 @@ var Pee = cc.Sprite.extend({
         this.setScale(0.5);
         this.scheduleUpdate();
     },
+    setDestroyTime:function(time){
+       this._stateProgress = time;
+    },
     collisionBoundingBox:function () {
         var collisionBox = cc.rectInset(this.getBoundingBox(), 3, 0);
         var diff = cc.pSub(this.desiredPosition, this.getPosition());

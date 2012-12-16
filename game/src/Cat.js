@@ -12,7 +12,7 @@ var Cat = cc.Sprite.extend({
     handleTouch:function(touchLocation)
     {
       this.stopAllActions();
-      var distance = Math.sqrt( Math.pow(this.getPositionX() - touchLocation.x, 2) + Math.pow(this.getPositionY() - touchLocation.y, 2) );
-      this.runAction( cc.MoveTo.create(distance / this._speed, touchLocation) );
+      var time = uu.timeMP(this.getPosition(), this._speed, touchLocation);
+      this.runAction( cc.MoveTo.create(time, touchLocation) );
     }
 });
