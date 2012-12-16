@@ -20,7 +20,7 @@ var AboutScene = cc.Layer.extend({
 
         var menuItem1 = new cc.MenuItemFont.create("Back", this, this.onMenu);
 
-        menuItem1.setPosition(new cc.Point(this.screenSize.width - 100, 50));
+        menuItem1.setPosition(new cc.Point(this.screenSize.width / 2, 150));
 
         var menu = cc.Menu.create(menuItem1);
         menu.setPosition(new cc.Point(0,0));
