@@ -18,18 +18,33 @@ var StartScene = cc.Layer.extend({
         gameOverLabel.setColor(new cc.Color3B(255,255,255));
         this._startscene.addChild(gameOverLabel);
 
-        this.setTouchEnabled(true);
+        cc.MenuItemFont.setFontName("Chelsea Market");
+
+        var menuItem1 = new cc.MenuItemFont.create("Play", this, this.onNewGame);
+        var menuItem2 = new cc.MenuItemFont.create("About", this, this.about);
+
+        
+        menuItem1.setPosition(new cc.Point(this.screenSize.width / 2, this.screenSize.height / 3));
+        menuItem2.setPosition(new cc.Point(this.screenSize.width / 2, this.screenSize.height / 3 - 50));
+
+        var menu = cc.Menu.create(menuItem1,menuItem2);
+        menu.setPosition(new cc.Point(0,0));
+
+        this.addChild(menu);
 
 		return true;
 	},
-    onTouchesEnded: function(ptouch, evt){
-        this.onNewGame(this);
-    },
     onNewGame:function (pSender) {
         var scene = cc.Scene.create();
         scene.addChild(GameLayer.create());
         // scene.addChild(GameControlMenu.create());
         cc.Director.getInstance().replaceScene(cc.TransitionFade.create(1.2, scene));
+    },
+    about:function(pSender){
+      var scene = cc.Scene.create();
+      scene.addChild(AboutScene.create());
+      // scene.addChild(GameControlMenu.create());
+      cc.Director.getInstance().replaceScene(cc.TransitionSlideInR.create(1.0, scene));
     }
 });
 
