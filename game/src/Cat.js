@@ -24,6 +24,8 @@ var Cat = cc.Sprite.extend({
     },
     handleTouch:function(touchLocation)
     {
+      this.setFlipX(touchLocation.x < this.getPositionX());
+      
       this.stopAllActions();
       var time = uu.timeMP(this.getPosition(), this._speed, touchLocation);
       console.log(this._speed + " " + time);

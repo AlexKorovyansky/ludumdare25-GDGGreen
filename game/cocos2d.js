@@ -43,6 +43,7 @@
             'game/src/GameLayer.js',
             'game/src/StartScene.js',
             'game/src/FinalScene.js',
+            'game/src/AngerBar.js',
             'game/src/HackUtils.js'
         ]
     };
