@@ -9,7 +9,7 @@ var GameLayer = cc.Layer.extend({
 
 		this.screenSize = cc.Director.getInstance().getWinSize();
 
-        this.map = cc.Sprite.create(image_game_background);
+        this.map = cc.Sprite.create("game/res/room.png");
         this.map.setPosition(cc.p(this.screenSize.width / 2, this.screenSize.height / 2));
         this.map.setVisible(true);
         this.map.setAnchorPoint(cc.p(0.5, 0.5));
@@ -62,7 +62,8 @@ var GameLayer = cc.Layer.extend({
         }
     },
     update:function(dt){
-        this.checkForAndResolveCollisions(this.cat)
+        this.checkForAndResolveCollisions(this.cat);
+        this.host.catchCat(this.cat, dt);
     }
 });
 

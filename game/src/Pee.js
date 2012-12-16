@@ -8,7 +8,8 @@ var Pee = cc.Sprite.extend({
     ctor:function (fileName, fileNameActive) {
         this._super();
         this.fileNameActive = fileNameActive;
-        this.initWithFile(fileName);
+        this.initWithFile("game/res/box.png");
+        this.setScale(0.5);
         this.scheduleUpdate();
     },
     collisionBoundingBox:function () {
