@@ -22,6 +22,7 @@ var GameLayer = cc.Layer.extend({
 
         this.pee = new Pee('game/res/armchair_before.png', 'game/res/armchair_after.png', 2);
         this.pee.setPosition(cc.p(this.screenSize.width / 3, this.screenSize.height / 3));
+        this.pee.setAnchorPoint(cc.p(0.5, 0.5));
         this.addChild(this.pee);
         this._pees.push(this.pee);
 
@@ -65,7 +66,9 @@ var GameLayer = cc.Layer.extend({
         for (var i = 0, pees_length = this._pees.length; i < pees_length; i++) {
             var pee = this._pees[i]
               , catRect = cc.RectMake(parseFloat(cat.getPositionX()), parseFloat(cat.getPositionY()), catRectWidth, catRectHeight)
-              , peeRect = cc.RectMake(parseFloat(pee.getPositionX()), parseFloat(pee.getPositionY()), pee.getContentSize().width * pee.getScale(), pee.getContentSize().height * pee.getScale());
+              , peeRectWidth = pee.getContentSize().width * pee.getScale() / 1.5
+              , peeRectHeight = pee.getContentSize().height * pee.getScale() / 1.5
+              , peeRect = cc.RectMake(parseFloat(pee.getPositionX()), parseFloat(pee.getPositionY()), peeRectWidth, peeRectHeight);
 
             if (cc.Rect.CCRectIntersectsRect(catRect, peeRect)) {
                 // var intersection = cc.Rect.CCRectIntersection(catRect, peeRect);
