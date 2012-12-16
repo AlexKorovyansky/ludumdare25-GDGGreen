@@ -1,4 +1,4 @@
-//tmx
+var image_game_background = "game/res/bg.png";
 
 //plist
 var s_objects_plist = "game/res/objects.plist";
