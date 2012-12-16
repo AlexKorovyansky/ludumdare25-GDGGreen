@@ -7,7 +7,7 @@ var StartScene = cc.Layer.extend({
 
 		this.screenSize = cc.Director.getInstance().getWinSize();
 
-        this._startscene = cc.Sprite.create("game/res/startscene.png");
+        this._startscene = cc.Sprite.create("game/res/start.png");
         this._startscene.setPosition(cc.p(0, 0));
         this._startscene.setVisible(true);
         this._startscene.setAnchorPoint(cc.p(0, 0));
