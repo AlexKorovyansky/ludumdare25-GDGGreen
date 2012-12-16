@@ -108,12 +108,11 @@ var GameLayer = cc.Layer.extend({
         scene.addChild(FinalScene.create());
         cc.AudioEngine.getInstance().playEffect(meow_effect);
         cc.Director.getInstance().replaceScene(cc.TransitionFade.create(1.2, scene));
-
     },
     winScreen:function(){
         var scene = cc.Scene.create();
         scene.addChild(WinScene.create());
-        cc.AudioEngine.getInstance().playEffect(meow_effect, false);
+        cc.AudioEngine.getInstance().playEffect(meow_effect);
         cc.Director.getInstance().replaceScene(cc.TransitionFade.create(1.2, scene));
     },
     initPees:function(){
