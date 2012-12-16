@@ -33,7 +33,7 @@ var GameLayer = cc.Layer.extend({
         // this.sprite.setScale(0.5);
         // this.sprite.setRotation(180);
         // this.addChild(this.sprite, 0);
-
+        this.schedule(this.update);
 		return true;
 	},
     onTouchesEnded: function(ptouch, evt){
@@ -48,13 +48,19 @@ var GameLayer = cc.Layer.extend({
         // this.cat.setPosition(location);
         // cc.MoveTo.create(duration, position)
 
-        this.cat.runAction(move)
+        this.cat.runAction(move);
+
     },
     onMouseDown: function(evt){
         this.cat.setPosition(cc.p(evt.x, evt.y));
     },
     onMouseMoved: function(evt){
         console.log("move")
+    },
+    update:function(dt){
+        console.log("tick");
+        // this.host.stopAllActions();
+        this.host.catchCat(this.cat, dt);
     }
 });
 
