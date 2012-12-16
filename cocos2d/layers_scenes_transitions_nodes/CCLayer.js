@@ -24,6 +24,13 @@
  THE SOFTWARE.
  ****************************************************************************/
 
+/** Layer will receive all the touches at once The onTouchesXXX API will be called
+ */
+cc.TOUCH_ALL_AT_ONCE = 0;
+
+/** Layer will receive only one touch at the time. The onTouchXXX API will be called */
+cc.TOUCH_ONE_BY_ONE = 1;
+
 /** cc.Layer is a subclass of cc.Node that implements the TouchEventsDelegate protocol.<br/>
  * All features from cc.Node are valid, plus the following new features:<br/>
  * It can receive iPhone Touches<br/>
@@ -34,22 +41,32 @@
 cc.Layer = cc.Node.extend(/** @lends cc.Layer# */{
     _isTouchEnabled:false,
     _isAccelerometerEnabled:false,
-    _isKeypadEnabled:false,
+    _isKeyboardEnabled:false,
+    _touchPriority:0,
+    _touchMode:cc.TOUCH_ALL_AT_ONCE,
+    _isMouseEnabled:false,
+    _mousePriority:0,
 
     /**
      * Constructor
-     * @return {Boolean} return false if director fails
      */
     ctor:function () {
         this._super();
+
+        //this._initLayer();
+    },
+
+    _initLayer:function () {
         this.setAnchorPoint(cc.p(0.5, 0.5));
         this._ignoreAnchorPointForPosition = true;
 
-        //this.initLayer();
         var director = cc.Director.getInstance();
         this.setContentSize(director.getWinSize());
         this._isTouchEnabled = false;
         this._isAccelerometerEnabled = false;
+        this._isMouseEnabled = false;
+        this._touchMode = cc.TOUCH_ALL_AT_ONCE;
+        this._touchPriority = 0;
     },
 
     /**
@@ -63,17 +80,50 @@ cc.Layer = cc.Node.extend(/** @lends cc.Layer# */{
          }
          this.setContentSize(director.getWinSize());
          this._isTouchEnabled = false;*/
-
-        // success
+        this._super();
+        this._initLayer();
         return true;
     },
 
     /**
-     * If isTouchEnabled, this method is called onEnter. Override it to change the<br/>
-     * way CCLayer receives touch events.<br/>
+     * If isTouchEnabled, this method is called onEnter.
      */
     registerWithTouchDispatcher:function () {
-        cc.Director.getInstance().getTouchDispatcher().addStandardDelegate(this, 0);
+        if (this._touchMode === cc.TOUCH_ALL_AT_ONCE)
+            cc.Director.getInstance().getTouchDispatcher().addStandardDelegate(this, this._touchPriority);
+        else
+            cc.Director.getInstance().getTouchDispatcher().addTargetedDelegate(this, this._touchPriority, true);
+    },
+
+    isMouseEnabled:function () {
+        return this._isMouseEnabled;
+    },
+
+    setMouseEnabled:function (enabled) {
+        if (this._isMouseEnabled != enabled) {
+            this._isMouseEnabled = enabled;
+            if (this._running) {
+                if (enabled)
+                    cc.Director.getInstance().getMouseDispatcher().addMouseDelegate(this, this._mousePriority);
+                else
+                    cc.Director.getInstance().getMouseDispatcher().removeMouseDelegate(this);
+            }
+        }
+    },
+
+    setMousePriority:function (priority) {
+        if (this._mousePriority != priority) {
+            this._mousePriority = priority;
+            // Update touch priority with handler
+            if (this._isMouseEnabled) {
+                this.setMouseEnabled(false);
+                this.setMouseEnabled(true);
+            }
+        }
+    },
+
+    getMousePriority:function () {
+        return this._mousePriority;
     },
 
     /**
@@ -94,13 +144,55 @@ cc.Layer = cc.Node.extend(/** @lends cc.Layer# */{
         if (this._isTouchEnabled != enabled) {
             this._isTouchEnabled = enabled;
 
-            if (this._isRunning) {
+            if (this._running) {
                 if (enabled) {
                     this.registerWithTouchDispatcher();
                 } else {
                     // have problems?
                     cc.Director.getInstance().getTouchDispatcher().removeDelegate(this);
                 }
+            }
+        }
+    },
+
+    /** returns the priority of the touch event handler
+     * @return {Number}
+     */
+    getTouchPriority:function () {
+        return this._touchPriority;
+    },
+
+    /** Sets the touch event handler priority. Default is 0.
+     * @param {Number} priority
+     */
+    setTouchPriority:function (priority) {
+        if (this._touchPriority != priority) {
+            this._touchPriority = priority;
+            // Update touch priority with handler
+            if (this._isTouchEnabled) {
+                this.setTouchEnabled(false);
+                this.setTouchEnabled(true);
+            }
+        }
+    },
+
+    /** returns the touch mode.
+     * @return {Number}
+     */
+    getTouchMode:function () {
+        return this._touchMode;
+    },
+
+    /** Sets the touch mode.
+     * @param {Number} mode
+     */
+    setTouchMode:function (mode) {
+        if (this._touchMode != mode) {
+            this._touchMode = mode;
+            // update the mode with handler
+            if (this._isTouchEnabled) {
+                this.setTouchEnabled(false);
+                this.setTouchEnabled(true);
             }
         }
     },
@@ -122,7 +214,7 @@ cc.Layer = cc.Node.extend(/** @lends cc.Layer# */{
         if (enabled != this._isAccelerometerEnabled) {
             this._isAccelerometerEnabled = enabled;
 
-            if (this._isRunning) {
+            if (this._running) {
                 var director = cc.Director.getInstance();
                 if (enabled) {
                     director.getAccelerometer().setDelegate(this);
@@ -134,28 +226,28 @@ cc.Layer = cc.Node.extend(/** @lends cc.Layer# */{
     },
 
     /**
-     * whether or not it will receive keypad events<br/>
+     * whether or not it will receive keyboard events<br/>
      * You can enable / disable accelerometer events with this property.<br/>
      * it's new in cocos2d-x
      * @return {Boolean}
      */
-    isKeypadEnabled:function () {
-        return this._isKeypadEnabled;
+    isKeyboardEnabled:function () {
+        return this._isKeyboardEnabled;
     },
 
     /**
      * Enable Keyboard interaction
      * @param {Boolean} enabled
      */
-    setKeypadEnabled:function (enabled) {
-        if (enabled != this._isKeypadEnabled) {
-            this._isKeypadEnabled = enabled;
-            if (this._isRunning) {
+    setKeyboardEnabled:function (enabled) {
+        if (enabled != this._isKeyboardEnabled) {
+            this._isKeyboardEnabled = enabled;
+            if (this._running) {
                 var director = cc.Director.getInstance();
                 if (enabled) {
-                    director.getKeypadDispatcher().addDelegate(this);
+                    director.getKeyboardDispatcher().addDelegate(this);
                 } else {
-                    director.getKeypadDispatcher().removeDelegate(this);
+                    director.getKeyboardDispatcher().removeDelegate(this);
                 }
             }
         }
@@ -175,15 +267,19 @@ cc.Layer = cc.Node.extend(/** @lends cc.Layer# */{
         // then iterate over all the children
         this._super();
 
+        //TODO not supported
         // add this layer to concern the Accelerometer Sensor
-        if (this._isAccelerometerEnabled) {
-            director.getAccelerometer().setDelegate(this);
-        }
+/*        if (this._isAccelerometerEnabled){
+           director.getAccelerometer().setDelegate(this);
+        }*/
+
 
         // add this layer to concern the kaypad msg
-        if (this._isKeypadEnabled) {
-            director.getKeypadDispatcher().addDelegate(this);
-        }
+        if (this._isKeyboardEnabled)
+            director.getKeyboardDispatcher().addDelegate(this);
+
+        if (this._isMouseEnabled)
+            director.getMouseDispatcher().addMouseDelegate(this, this._mousePriority);
     },
 
     /**
@@ -196,14 +292,18 @@ cc.Layer = cc.Node.extend(/** @lends cc.Layer# */{
         }
 
         // remove this layer from the delegates who concern Accelerometer Sensor
-        if (this._isAccelerometerEnabled) {
+        //TODO not supported
+/*        if (this._isAccelerometerEnabled) {
             director.getAccelerometer().setDelegate(null);
-        }
+        }*/
 
         // remove this layer from the delegates who concern the kaypad msg
-        if (this._isKeypadEnabled) {
-            director.getKeypadDispatcher().removeDelegate(this);
+        if (this._isKeyboardEnabled) {
+            director.getKeyboardDispatcher().removeDelegate(this);
         }
+
+        if (this._isMouseEnabled)
+            director.getMouseDispatcher().removeMouseDelegate(this);
 
         this._super();
     },
@@ -212,9 +312,10 @@ cc.Layer = cc.Node.extend(/** @lends cc.Layer# */{
      * this is called when ever a layer is a child of a scene that just finished a transition
      */
     onEnterTransitionDidFinish:function () {
-        if (this._isAccelerometerEnabled) {
+        //TODO not supported
+        /*if (this._isAccelerometerEnabled) {
             cc.Director.getInstance().getAccelerometer().setDelegate(this);
-        }
+        }*/
         this._super();
     },
 
@@ -284,13 +385,143 @@ cc.Layer = cc.Node.extend(/** @lends cc.Layer# */{
     onTouchesCancelled:function (touch, event) {
     },
 
-    onKeyDown:function (e) {
-    },
-
-    onKeyUp:function (e) {
-    },
-
     didAccelerate:function (pAccelerationValue) {
+    },
+
+    // ---------------------CCMouseEventDelegate interface------------------------------
+
+    /**
+     * <p>called when the "mouseDown" event is received. <br/>
+     * Return YES to avoid propagating the event to other delegates.  </p>
+     * @param event
+     * @return {Boolean}
+     */
+    onMouseDown:function (event) {
+        return false;
+    },
+
+    /**
+     * <p>called when the "mouseDragged" event is received.         <br/>
+     * Return YES to avoid propagating the event to other delegates.</p>
+     * @param event
+     * @return {Boolean}
+     */
+    onMouseDragged:function (event) {
+        return false;
+    },
+
+    /**
+     * <p> called when the "mouseMoved" event is received.            <br/>
+     * Return YES to avoid propagating the event to other delegates.  </p>
+     * @param event
+     * @return {Boolean}
+     */
+    onMouseMoved:function (event) {
+        return false;
+    },
+
+    /**
+     * <p> called when the "mouseUp" event is received.               <br/>
+     * Return YES to avoid propagating the event to other delegates.  </p>
+     * @param event
+     * @return {Boolean}
+     */
+    onMouseUp:function (event) {
+        return false;
+    },
+
+    //right
+    /**
+     * <p> called when the "rightMouseDown" event is received.        <br/>
+     * Return YES to avoid propagating the event to other delegates.  </p>
+     * @param event
+     * @return {Boolean}
+     */
+    onRightMouseDown:function (event) {
+        return false;
+    },
+
+    /**
+     * <p> called when the "rightMouseDragged" event is received.    <br/>
+     * Return YES to avoid propagating the event to other delegates. </p>
+     * @param event
+     * @return {Boolean}
+     */
+    onRightMouseDragged:function (event) {
+        return false;
+    },
+
+    /**
+     * <p> called when the "rightMouseUp" event is received.          <br/>
+     * Return YES to avoid propagating the event to other delegates.  </p>
+     * @param event
+     * @return {Boolean}
+     */
+    onRightMouseUp:function (event) {
+        return false;
+    },
+
+    //other
+    /**
+     * <p>called when the "otherMouseDown" event is received.         <br/>
+     * Return YES to avoid propagating the event to other delegates.  </p>
+     * @param event
+     * @return {Boolean}
+     */
+    onOtherMouseDown:function (event) {
+        return false;
+    },
+
+    /**
+     * <p> called when the "otherMouseDragged" event is received.     <br/>
+     * Return YES to avoid propagating the event to other delegates.  </p>
+     * @param event
+     * @return {Boolean}
+     */
+    onOtherMouseDragged:function (event) {
+        return false;
+    },
+
+    /**
+     * <p> called when the "otherMouseUp" event is received.          <br/>
+     * Return YES to avoid propagating the event to other delegates.  </p>
+     * @param event
+     * @return {Boolean}
+     */
+    onOtherMouseUp:function (event) {
+        return false;
+    },
+
+    //scroll wheel
+    /**
+     * <p> called when the "scrollWheel" event is received.           <br/>
+     * Return YES to avoid propagating the event to other delegates.  </p>
+     * @param event
+     * @return {Boolean}
+     */
+    onScrollWheel:function (event) {
+        return false;
+    },
+
+    // enter / exit
+    /**
+     *  <p> called when the "mouseEntered" event is received.         <br/>
+     *  Return YES to avoid propagating the event to other delegates. </p>
+     * @param theEvent
+     * @return {Boolean}
+     */
+    onMouseEntered:function (theEvent) {
+        return false;
+    },
+
+    /**
+     * <p> called when the "mouseExited" event is received.          <br/>
+     * Return YES to avoid propagating the event to other delegates. </p>
+     * @param theEvent
+     * @return {Boolean}
+     */
+    onMouseExited:function (theEvent) {
+        return false;
     }
 });
 
@@ -320,11 +551,13 @@ cc.Layer.create = function () {
  * @extends cc.Layer
  */
 cc.LayerColor = cc.Layer.extend(/** @lends cc.LayerColor# */{
+    RGBAProtocol:true,
     _squareVertices:[],
     _squareColors:[],
     _opacity:0,
     _color:new cc.Color3B(255, 255, 255),
     _blendFunc:new cc.BlendFunc(cc.BLEND_SRC, cc.BLEND_DST),
+    _layerColorStr:null,
 
     /**
      * Constructor
@@ -333,7 +566,13 @@ cc.LayerColor = cc.Layer.extend(/** @lends cc.LayerColor# */{
         this._squareVertices = [new cc.Vertex2F(0, 0), new cc.Vertex2F(0, 0), new cc.Vertex2F(0, 0), new cc.Vertex2F(0, 0)];
         this._squareColors = [new cc.Color4F(0, 0, 0, 1), new cc.Color4F(0, 0, 0, 1), new cc.Color4F(0, 0, 0, 1), new cc.Color4F(0, 0, 0, 1)];
         this._color = new cc.Color4B(0, 0, 0, 0);
+        this._opacity = 255;
         this._super();
+        this._layerColorStr = this._getLayerColorString();
+    },
+
+    _getLayerColorString:function () {
+        return "rgba(" + (0 | this._color.r) + "," + (0 | this._color.g) + "," + (0 | this._color.b) + "," + (this.getOpacity() / 255).toFixed(5) + ")";
     },
 
     /**
@@ -351,8 +590,6 @@ cc.LayerColor = cc.Layer.extend(/** @lends cc.LayerColor# */{
     setOpacity:function (Var) {
         this._opacity = Var;
         this._updateColor();
-
-        //this._addDirtyRegionToDirector(this.boundingBoxToWorld());
         this.setNodeDirty();
     },
 
@@ -371,8 +608,6 @@ cc.LayerColor = cc.Layer.extend(/** @lends cc.LayerColor# */{
     setColor:function (Var) {
         this._color = Var;
         this._updateColor();
-
-        //this._addDirtyRegionToDirector(this.boundingBoxToWorld());
         this.setNodeDirty();
     },
 
@@ -384,21 +619,31 @@ cc.LayerColor = cc.Layer.extend(/** @lends cc.LayerColor# */{
         return this._blendFunc;
     },
 
+    _isLighterMode:false,
     /**
      * blendFunc setter
-     * @param {cc.BlendFunc} Var
+     * @param {Number} src
+     * @param {Number} dst
      */
-    setBlendFunc:function (Var) {
-        this._blendFunc = Var;
+    setBlendFunc:function (src, dst) {
+        if (arguments.length == 1) {
+            this._blendFunc = src;
+        } else {
+            this._blendFunc = {src:src, dst:dst};
+        }
+        this._isLighterMode = (this._blendFunc && (this._blendFunc.src == 1) && (this._blendFunc.dst == 771));
     },
 
     /**
      * @param color
      * @return {Boolean}
      */
-    initWithColor:function (color, width, height) {
+    init:function (color, width, height) {
+        this._initLayer();
+
         var winSize = cc.Director.getInstance().getWinSize();
 
+        color = color || new cc.Color4B(0, 0, 0, 255);
         width = width || winSize.width;
         height = height || winSize.height;
 
@@ -412,9 +657,10 @@ cc.LayerColor = cc.Layer.extend(/** @lends cc.LayerColor# */{
             this._squareVertices[i].x = 0.0;
             this._squareVertices[i].y = 0.0;
         }
-        this._updateColor();
 
-        this.setContentSize(new cc.Size(width, height));
+        this.setContentSize(cc.size(width, height));
+
+        this._updateColor();
         //this.setShaderProgram(cc.ShaderCache.getInstance().programForKey(kCCShader_PositionColor));
 
         return true;
@@ -438,7 +684,7 @@ cc.LayerColor = cc.Layer.extend(/** @lends cc.LayerColor# */{
      * @param {Number} h height
      */
     changeWidthAndHeight:function (w, h) {
-        this.setContentSize(cc.SizeMake(w, h));
+        this.setContentSize(cc.size(w, h));
     },
 
     /**
@@ -446,7 +692,7 @@ cc.LayerColor = cc.Layer.extend(/** @lends cc.LayerColor# */{
      * @param {Number} w width
      */
     changeWidth:function (w) {
-        this.setContentSize(cc.SizeMake(w, this._contentSize.height));
+        this.setContentSize(cc.size(w, this._contentSize.height));
     },
 
     /**
@@ -454,7 +700,7 @@ cc.LayerColor = cc.Layer.extend(/** @lends cc.LayerColor# */{
      * @param {Number} h height
      */
     changeHeight:function (h) {
-        this.setContentSize(cc.SizeMake(this._contentSize.width, h));
+        this.setContentSize(cc.size(this._contentSize.width, h));
     },
 
     _updateColor:function () {
@@ -466,8 +712,17 @@ cc.LayerColor = cc.Layer.extend(/** @lends cc.LayerColor# */{
         }
     },
 
+    /**
+     * set OpacityModifyRGB of cc.LayerColor
+     * @param {Boolean}  value
+     */
     setOpacityModifyRGB:function (value) {
     },
+
+    /**
+     * is OpacityModifyRGB
+     * @return {Boolean}
+     */
     isOpacityModifyRGB:function () {
         return false;
     },
@@ -479,36 +734,27 @@ cc.LayerColor = cc.Layer.extend(/** @lends cc.LayerColor# */{
     draw:function (ctx) {
         var context = ctx || cc.renderContext;
 
-        if (cc.renderContextType == cc.CANVAS) {
-            //context.globalAlpha = this.getOpacity() / 255;
-            var tWidth = this.getContentSize().width;
-            var tHeight = this.getContentSize().height;
-            var apip = this.getAnchorPointInPoints();
-            var tGradient = context.createLinearGradient(-apip.x, apip.y,
-                -apip.x + tWidth, -(apip.y + tHeight));
+        var tWidth = this.getContentSize().width;
+        var tHeight = this.getContentSize().height;
+        var apip = this.getAnchorPointInPoints();
 
-            tGradient.addColorStop(0, "rgba(" + Math.round(this._squareColors[0].r * 255) + "," + Math.round(this._squareColors[0].g * 255) + ","
-                + Math.round(this._squareColors[0].b * 255) + "," + this._squareColors[0].a.toFixed(4) + ")");
-            tGradient.addColorStop(1, "rgba(" + Math.round(this._squareColors[3].r * 255) + "," + Math.round(this._squareColors[3].g * 255) + ","
-                + Math.round(this._squareColors[3].b * 255) + "," + this._squareColors[3].a.toFixed(4) + ")");
-
-            context.fillStyle = tGradient;
-            context.fillRect(-apip.x, apip.y, tWidth, -tHeight);
-        } else {
-            /*cc.NODE_DRAW_SETUP();
-             ccGLEnableVertexAttribs( kCCVertexAttribFlag_Position | kCCVertexAttribFlag_Color );
-
-             //
-             // Attributes
-             //
-             glVertexAttribPointer(kCCVertexAttrib_Position, 2, GL_FLOAT, GL_FALSE, 0, m_pSquareVertices);
-             glVertexAttribPointer(kCCVertexAttrib_Color, 4, GL_FLOAT, GL_FALSE, 0, m_pSquareColors);
-             ccGLBlendFunc( m_tBlendFunc.src, m_tBlendFunc.dst );
-             glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);   */
-        }
-        this._super(context);
+        context.fillStyle = "rgba(" + (0 | this._color.r) + "," + (0 | this._color.g) + "," + (0 | this._color.b) + "," + this.getOpacity() / 255 + ")";
+        context.fillRect(-apip.x, apip.y, tWidth, -tHeight);
 
         cc.INCREMENT_GL_DRAWS(1);
+    },
+
+    _drawForWebGL:function (ctx) {
+        /*cc.NODE_DRAW_SETUP();
+         ccGLEnableVertexAttribs( kCCVertexAttribFlag_Position | kCCVertexAttribFlag_Color );
+
+         //
+         // Attributes
+         //
+         glVertexAttribPointer(kCCVertexAttrib_Position, 2, GL_FLOAT, GL_FALSE, 0, m_pSquareVertices);
+         glVertexAttribPointer(kCCVertexAttrib_Color, 4, GL_FLOAT, GL_FALSE, 0, m_pSquareColors);
+         ccGLBlendFunc( m_tBlendFunc.src, m_tBlendFunc.dst );
+         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);   */
     }
 });
 
@@ -521,11 +767,11 @@ cc.LayerColor = cc.Layer.extend(/** @lends cc.LayerColor# */{
  * @example
  * // Example
  * //Create a yellow color layer as background
- * var yellowBackground = cc.LayerColor.create(cc.c4(255,255,0,255));
+ * var yellowBackground = cc.LayerColor.create(cc.c4b(255,255,0,255));
  * //If you didnt pass in width and height, it defaults to the same size as the canvas
  *
  * //create a yellow box, 200 by 200 in size
- * var yellowBox = cc.LayerColor.create(cc.c3(255,255,0,255), 200, 200);
+ * var yellowBox = cc.LayerColor.create(cc.c3b(255,255,0,255), 200, 200);
  */
 cc.LayerColor.create = function (color, width, height) {
     var ret = new cc.LayerColor();
@@ -534,10 +780,10 @@ cc.LayerColor.create = function (color, width, height) {
             ret.init();
             break;
         case 1:
-            ret.initWithColor(color);
+            ret.init(color);
             break;
         case 3:
-            ret.initWithColor(color, width, height);
+            ret.init(color, width, height);
             break;
         default :
             ret.init();
@@ -569,21 +815,32 @@ cc.LayerColor.create = function (color, width, height) {
  * @extends cc.LayerColor
  */
 cc.LayerGradient = cc.LayerColor.extend(/** @lends cc.LayerGradient# */{
-    _startColor:new cc.Color3B(0, 0, 0),
-    _endColor:new cc.Color3B(0, 0, 0),
+    _startColor:null,
+    _endColor:null,
     _startOpacity:null,
     _endOpacity:null,
     _alongVector:null,
     _compressedInterpolation:false,
+
+    _gradientStartPoint:null,
+    _gradientEndPoint:null,
 
     /**
      * Constructor
      * @function
      */
     ctor:function () {
+        this._super();
+
+        this._color = new cc.Color3B(0, 0, 0);
         this._startColor = new cc.Color3B(0, 0, 0);
         this._endColor = new cc.Color3B(0, 0, 0);
-        this._super();
+        this._alongVector = cc.p(0, -1);
+        this._startOpacity = 255;
+        this._endOpacity = 255;
+
+        this._gradientStartPoint = cc.p(0, 0);
+        this._gradientEndPoint = cc.p(0, 0);
     },
 
     /**
@@ -599,7 +856,7 @@ cc.LayerGradient = cc.LayerColor.extend(/** @lends cc.LayerGradient# */{
      * @param {cc.Color3B} color
      * @example
      * // Example
-     * myGradientLayer.setStartColor(cc.c3(255,0,0));
+     * myGradientLayer.setStartColor(cc.c3b(255,0,0));
      * //set the starting gradient to red
      */
     setStartColor:function (color) {
@@ -611,7 +868,7 @@ cc.LayerGradient = cc.LayerColor.extend(/** @lends cc.LayerGradient# */{
      * @param {cc.Color3B} color
      * @example
      * // Example
-     * myGradientLayer.setEndColor(cc.c3(255,0,0));
+     * myGradientLayer.setEndColor(cc.c3b(255,0,0));
      * //set the ending gradient to red
      */
     setEndColor:function (color) {
@@ -666,7 +923,7 @@ cc.LayerGradient = cc.LayerColor.extend(/** @lends cc.LayerGradient# */{
      * @param {cc.Point} Var
      */
     setVector:function (Var) {
-        this.alongVector = Var;
+        this._alongVector = Var;
         this._updateColor();
     },
 
@@ -674,10 +931,10 @@ cc.LayerGradient = cc.LayerColor.extend(/** @lends cc.LayerGradient# */{
      * @return {cc.Point}
      */
     getVector:function () {
-        return this.alongVector;
+        return this._alongVector;
     },
 
-    /**
+    /** is Compressed Interpolation
      * @return {Boolean}
      */
     isCompressedInterpolation:function () {
@@ -698,8 +955,12 @@ cc.LayerGradient = cc.LayerColor.extend(/** @lends cc.LayerGradient# */{
      * @param {cc.Point|Null} v
      * @return {Boolean}
      */
-    initWithColor:function (start, end, v) {
+    init:function (start, end, v) {
         var argnum = arguments.length;
+
+        if (argnum == 0)
+            return this._super();
+
         if (argnum == 2) {
             // Initializes the CCLayer with a gradient between start and end.
             v = cc.p(0, -1);
@@ -716,69 +977,93 @@ cc.LayerGradient = cc.LayerColor.extend(/** @lends cc.LayerGradient# */{
         this._endColor.b = end.b;
         this._endOpacity = end.a;
 
-        this.alongVector = v;
+        this._alongVector = v;
 
         this._compressedInterpolation = true;
 
-        return this._super(cc.c4(start.r, start.g, start.b, 255));
+        this._super(cc.c4b(start.r, start.g, start.b, 255));
+        return true;
     },
 
     _updateColor:function () {
-        //todo need fixed for webGL
-        this._super();
-        /*
-         this._squareColors[0].r = Math.round(this._startColor.r);
-         this._squareColors[0].g = Math.round(this._startColor.g);
-         this._squareColors[0].b = Math.round(this._startColor.b);
-         this._squareColors[0].a = Math.round(this._startColor.a);
+        if (cc.renderContextType === cc.CANVAS) {
+            var tWidth = this.getContentSize().width / 2;
+            var tHeight = this.getContentSize().height / 2;
+            var apip = this.getAnchorPointInPoints();
+            var offWidth = tWidth - apip.x;
+            var offHeight = tHeight - apip.y;
 
-         this._squareColors[3].r = Math.round(this._endColor.r);
-         this._squareColors[3].g = Math.round(this._endColor.g);
-         this._squareColors[3].b = Math.round(this._endColor.b);
-         this._squareColors[3].a = Math.round(this._endColor.a);
-         return;
-         */
+            this._gradientStartPoint = cc.p(tWidth * -this._alongVector.x + offWidth, tHeight * this._alongVector.y - offHeight);
+            this._gradientEndPoint = cc.p(tWidth * this._alongVector.x + offWidth, tHeight * -this._alongVector.y - offHeight);
+        } else {
+            //todo need fixed for webGL
+            this._super();
 
+            var h = cc.pLength(this._alongVector);
+            if (h == 0)
+                return;
 
-        var h = cc.pLength(this.alongVector);
-        if (h == 0)
-            return;
+            var c = Math.sqrt(2.0);
+            var u = cc.p(this._alongVector.x / h, this._alongVector.y / h);
 
-        var c = Math.sqrt(2.0);
-        var u = cc.p(this.alongVector.x / h, this.alongVector.y / h);
+            // Compressed Interpolation mode
+            if (this._compressedInterpolation) {
+                var h2 = 1 / ( Math.abs(u.x) + Math.abs(u.y) );
+                u = cc.pMult(u, h2 * c);
+            }
 
-        // Compressed Interpolation mode
-        if (this._compressedInterpolation) {
-            var h2 = 1 / ( Math.abs(u.x) + Math.abs(u.y) );
-            u = cc.pMult(u, h2 * c);
+            var opacityf = this._opacity / 255.0;
+
+            var S = new cc.Color4F(this._color.r / 255, this._color.g / 255, this._color.b / 255, (this._startOpacity * opacityf) / 255);
+
+            var E = new cc.Color4F(this._endColor.r / 255, this._endColor.g / 255, this._endColor.b / 255, (this._endOpacity * opacityf) / 255);
+
+            // (-1, -1)
+            this._squareColors[0].r = ((E.r + (S.r - E.r) * ((c + u.x + u.y) / (2.0 * c))));
+            this._squareColors[0].g = ((E.g + (S.g - E.g) * ((c + u.x + u.y) / (2.0 * c))));
+            this._squareColors[0].b = ((E.b + (S.b - E.b) * ((c + u.x + u.y) / (2.0 * c))));
+            this._squareColors[0].a = ((E.a + (S.a - E.a) * ((c + u.x + u.y) / (2.0 * c))));
+            // (1, -1)
+            this._squareColors[1].r = ((E.r + (S.r - E.r) * ((c - u.x + u.y) / (2.0 * c))));
+            this._squareColors[1].g = ((E.g + (S.g - E.g) * ((c - u.x + u.y) / (2.0 * c))));
+            this._squareColors[1].b = ((E.b + (S.b - E.b) * ((c - u.x + u.y) / (2.0 * c))));
+            this._squareColors[1].a = ((E.a + (S.a - E.a) * ((c - u.x + u.y) / (2.0 * c))));
+            // (-1, 1)
+            this._squareColors[2].r = ((E.r + (S.r - E.r) * ((c + u.x - u.y) / (2.0 * c))));
+            this._squareColors[2].g = ((E.g + (S.g - E.g) * ((c + u.x - u.y) / (2.0 * c))));
+            this._squareColors[2].b = ((E.b + (S.b - E.b) * ((c + u.x - u.y) / (2.0 * c))));
+            this._squareColors[2].a = ((E.a + (S.a - E.a) * ((c + u.x - u.y) / (2.0 * c))));
+            // (1, 1)
+            this._squareColors[3].r = ((E.r + (S.r - E.r) * ((c - u.x - u.y) / (2.0 * c))));
+            this._squareColors[3].g = ((E.g + (S.g - E.g) * ((c - u.x - u.y) / (2.0 * c))));
+            this._squareColors[3].b = ((E.b + (S.b - E.b) * ((c - u.x - u.y) / (2.0 * c))));
+            this._squareColors[3].a = ((E.a + (S.a - E.a) * ((c - u.x - u.y) / (2.0 * c))));
         }
+    },
 
-        var opacityf = this._opacity / 255.0;
+    draw:function (ctx) {
+        var context = ctx || cc.renderContext;
+        if (cc.renderContextType == cc.CANVAS) {
+            if (this._isLighterMode)
+                context.globalCompositeOperation = 'lighter';
 
-        var S = new cc.Color4F(this._startColor.r / 255, this._startColor.g / 255, this._startColor.b / 255, (this._startOpacity * opacityf) / 255);
+            context.save();
+            var tWidth = this.getContentSize().width;
+            var tHeight = this.getContentSize().height;
+            var apip = this.getAnchorPointInPoints();
+            var tGradient = context.createLinearGradient(this._gradientStartPoint.x, this._gradientStartPoint.y,
+                this._gradientEndPoint.x, this._gradientEndPoint.y);
+            tGradient.addColorStop(0, "rgba(" + Math.round(this._color.r) + "," + Math.round(this._color.g) + ","
+                + Math.round(this._color.b) + "," + (this._startOpacity / 255).toFixed(4) + ")");
+            tGradient.addColorStop(1, "rgba(" + Math.round(this._endColor.r) + "," + Math.round(this._endColor.g) + ","
+                + Math.round(this._endColor.b) + "," + (this._endOpacity / 255).toFixed(4) + ")");
+            context.fillStyle = tGradient;
+            context.fillRect(-apip.x, apip.y, tWidth, -tHeight);
 
-        var E = new cc.Color4F(this._endColor.r / 255, this._endColor.g / 255, this._endColor.b / 255, (this._endOpacity * opacityf) / 255);
-
-        // (-1, -1)
-        this._squareColors[0].r = parseInt((E.r + (S.r - E.r) * ((c + u.x + u.y) / (2.0 * c))));
-        this._squareColors[0].g = parseInt((E.g + (S.g - E.g) * ((c + u.x + u.y) / (2.0 * c))));
-        this._squareColors[0].b = parseInt((E.b + (S.b - E.b) * ((c + u.x + u.y) / (2.0 * c))));
-        this._squareColors[0].a = parseInt((E.a + (S.a - E.a) * ((c + u.x + u.y) / (2.0 * c))));
-        // (1, -1)
-        this._squareColors[1].r = parseInt((E.r + (S.r - E.r) * ((c - u.x + u.y) / (2.0 * c))));
-        this._squareColors[1].g = parseInt((E.g + (S.g - E.g) * ((c - u.x + u.y) / (2.0 * c))));
-        this._squareColors[1].b = parseInt((E.b + (S.b - E.b) * ((c - u.x + u.y) / (2.0 * c))));
-        this._squareColors[1].a = parseInt((E.a + (S.a - E.a) * ((c - u.x + u.y) / (2.0 * c))));
-        // (-1, 1)
-        this._squareColors[2].r = parseInt((E.r + (S.r - E.r) * ((c + u.x - u.y) / (2.0 * c))));
-        this._squareColors[2].g = parseInt((E.g + (S.g - E.g) * ((c + u.x - u.y) / (2.0 * c))));
-        this._squareColors[2].b = parseInt((E.b + (S.b - E.b) * ((c + u.x - u.y) / (2.0 * c))));
-        this._squareColors[2].a = parseInt((E.a + (S.a - E.a) * ((c + u.x - u.y) / (2.0 * c))));
-        // (1, 1)
-        this._squareColors[3].r = parseInt((E.r + (S.r - E.r) * ((c - u.x - u.y) / (2.0 * c))));
-        this._squareColors[3].g = parseInt((E.g + (S.g - E.g) * ((c - u.x - u.y) / (2.0 * c))));
-        this._squareColors[3].b = parseInt((E.b + (S.b - E.b) * ((c - u.x - u.y) / (2.0 * c))));
-        this._squareColors[3].a = parseInt((E.a + (S.a - E.a) * ((c - u.x - u.y) / (2.0 * c))));
+            if (this._rotation != 0)
+                context.rotate(this._rotationRadians);
+            context.restore();
+        }
     }
 });
 
@@ -794,18 +1079,20 @@ cc.LayerGradient.create = function (start, end, v) {
     switch (arguments.length) {
         case 2:
             /** Creates a full-screen CCLayer with a gradient between start and end. */
-            if (layer && layer.initWithColor(start, end)) {
+            if (layer && layer.init(start, end)) {
                 return layer;
             }
             break;
         case 3:
             /** Creates a full-screen CCLayer with a gradient between start and end in the direction of v. */
-            if (layer && layer.initWithColor(start, end, v)) {
+            if (layer && layer.init(start, end, v)) {
                 return layer;
             }
             break;
         case 0:
-            layer.init();
+            if (layer && layer.init()) {
+                return layer;
+            }
             break;
         default:
             throw "Arguments error ";
@@ -1030,7 +1317,7 @@ cc.LazyLayer = cc.Node.extend(/** @lends cc.LazyLayer# */{
      */
     visit:function () {
         // quick return if not visible
-        if (!this._isVisible) {
+        if (!this._visible) {
             return;
         }
         if (!this._isNeedUpdate) {
@@ -1053,6 +1340,10 @@ cc.LazyLayer = cc.Node.extend(/** @lends cc.LazyLayer# */{
         context.restore();
     },
 
+    /**
+     * override onExit of cc.Node
+     * @override
+     */
     onExit:function () {
         this._super();
 
@@ -1063,7 +1354,7 @@ cc.LazyLayer = cc.Node.extend(/** @lends cc.LazyLayer# */{
     },
 
     _setNodeDirtyForCache:function () {
-        this._isCacheDirty = true;
+        this._cacheDirty = true;
         this._isNeedUpdate = true;
     }
 });

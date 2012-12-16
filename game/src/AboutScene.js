@@ -12,13 +12,8 @@ var AboutScene = cc.Layer.extend({
         this._aboutscene.setVisible(true);
         this._aboutscene.setAnchorPoint(cc.p(0, 0));
         this.addChild(this._aboutscene, 0);
-        
-        // var gameOverLabel = cc.LabelTTF.create("Catvillain", "Chelsea Market", 76);
-        // gameOverLabel.setPosition(cc.p(this.screenSize.width / 2, this.screenSize.height / 2));
-        // gameOverLabel.setColor(new cc.Color3B(255,255,255));
-        // this._aboutscene.addChild(gameOverLabel);
 
-        var menuItem1 = new cc.MenuItemFont.create("Back", this, this.onMenu);
+        var menuItem1 = new cc.MenuItemFont.create("Back", 'onMenu', this);
 
         menuItem1.setPosition(new cc.Point(this.screenSize.width / 2, 150));
 

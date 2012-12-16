@@ -132,7 +132,7 @@ cc.AnimationFrame = cc.Class.extend(/** @lends cc.AnimationFrame# */{
  * var animation = cc.Animation.create();
  *
  * //add a sprite frame to this animation
- * animation.addFrameWithFileName("grossini_dance_01.png");
+ * animation.addFrameWithFile("grossini_dance_01.png");
  *
  * //create an animate with this animation
  * var action = cc.Animate.create(animation);
@@ -190,15 +190,15 @@ cc.Animation = cc.Class.extend(/** @lends cc.Animation# */{
      * Adds a frame with an image filename. Internally it will create a cc.SpriteFrame and it will add it. The frame will be added with one "delay unit".
      * @param {String} fileName
      */
-    addSpriteFrameWithFileName:function (fileName) {
+    addSpriteFrameWithFile:function (fileName) {
         var texture = cc.TextureCache.getInstance().addImage(fileName);
         var rect = cc.RectZero();
         if ((texture instanceof HTMLImageElement) || (texture instanceof HTMLCanvasElement)) {
-            rect.size = cc.SizeMake(texture.width, texture.height);
+            rect.size = cc.size(texture.width, texture.height);
         } else {
             rect.size = texture.getContentSize();
         }
-        var frame = cc.SpriteFrame.create(texture, rect);
+        var frame = cc.SpriteFrame.createWithTexture(texture, rect);
         this.addSpriteFrame(frame);
     },
 
@@ -208,7 +208,7 @@ cc.Animation = cc.Class.extend(/** @lends cc.Animation# */{
      * @param {cc.Rect} rect
      */
     addSpriteFrameWithTexture:function (texture, rect) {
-        var pFrame = cc.SpriteFrame.create(texture, rect);
+        var pFrame = cc.SpriteFrame.createWithTexture(texture, rect);
         this.addSpriteFrame(pFrame);
     },
 
@@ -350,7 +350,7 @@ cc.Animation = cc.Class.extend(/** @lends cc.Animation# */{
  *
  * //Create an animation with sprite frames
  * var animFrames = [];
- * var frame = cache.spriteFrameByName("grossini_dance_01.png");
+ * var frame = cache.getSpriteFrame("grossini_dance_01.png");
  * animFrames.push(frame);
  * var animation2 = cc.Animation.create(animFrames);
  *
@@ -382,18 +382,6 @@ cc.Animation.create = function (frames, delay, loops) {
 cc.Animation.createWithAnimationFrames = function (arrayOfAnimationFrameNames, delayPerUnit, loops) {
     var animation = new cc.Animation();
     animation.initWithAnimationFrames(arrayOfAnimationFrameNames, delayPerUnit, loops);
-    return animation;
-};
-
-/**
- * Creates an animation with an array of cc.SpriteFrame and a delay between frames in seconds. The frames will be added with one "delay unit".
- * @param {Array} arrayOfSpriteFrameNames
- * @param {Number} delay
- * @return {cc.Animation}
- */
-cc.Animation.createWithSpriteFrames = function (arrayOfSpriteFrameNames, delay) {
-    var animation = new cc.Animation();
-    animation.initWithSpriteFrames(arrayOfSpriteFrameNames, delay);
     return animation;
 };
 

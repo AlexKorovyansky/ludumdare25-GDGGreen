@@ -58,12 +58,8 @@ cc.PARTICLE_DEFAULT_CAPACITY = 100;
 cc.ParticleBatchNode = cc.Node.extend(/** @lends cc.ParticleBatchNode# */{
     TextureProtocol:true,
     //the blend function used for drawing the quads
-    _blendFunc:new cc.BlendFunc(cc.BLEND_SRC, cc.BLEND_DST),
+    _blendFunc:{src:cc.BLEND_SRC, dst:cc.BLEND_DST},
     _textureAtlas:null,
-
-    ctor:function () {
-
-    },
 
     /**
      * initializes the particle system with cc.Texture2D, a capacity of particles
@@ -91,7 +87,7 @@ cc.ParticleBatchNode = cc.Node.extend(/** @lends cc.ParticleBatchNode# */{
      * @param {Number} capacity
      * @return {Boolean}
      */
-    initWithFile:function (fileImage, capacity) {
+    init:function (fileImage, capacity) {
         var tex = cc.TextureCache.getInstance().addImage(fileImage);
         return this.initWithTexture(tex, capacity);
     },
@@ -116,7 +112,8 @@ cc.ParticleBatchNode = cc.Node.extend(/** @lends cc.ParticleBatchNode# */{
                 cc.Assert(child.getTexture() == this._textureAtlas.getTexture(), "cc.ParticleSystem is not using the same texture id");
                 // If this is the 1st children, then copy blending function
                 if (this._children.length == 0) {
-                    this.setBlendFunc(child.getBlendFunc());
+                    var blend = child.getBlendFunc();
+                    this.setBlendFunc(blend.src, blend.dst);
                 }
 
                 cc.Assert(this._blendFunc.src == child.getBlendFunc().src && this._blendFunc.dst == pChild.getBlendFunc().dst,
@@ -258,7 +255,7 @@ cc.ParticleBatchNode = cc.Node.extend(/** @lends cc.ParticleBatchNode# */{
     /**
      * @param {Boolean} doCleanup
      */
-    removeAllChildrenWithCleanup:function (doCleanup) {
+    removeAllChildren:function (doCleanup) {
         for (var i = 0; i < this._children.length; i++) {
             this._children[i].setBatchNode(null);
         }
@@ -276,7 +273,12 @@ cc.ParticleBatchNode = cc.Node.extend(/** @lends cc.ParticleBatchNode# */{
             quad.tl.vertices.x = quad.tl.vertices.y = quad.bl.vertices.x = quad.bl.vertices.y = 0.0;
     },
 
-    draw:function (ctx) {
+    /**
+     * @override
+     * @param {CanvasContext} ctx
+     */
+     // XXX: Remove the "XXX_" prefix once WebGL is supported
+    XXX_draw:function (ctx) {
         cc.PROFILER_STOP("CCParticleBatchNode - draw");
         if (this._textureAtlas.getTotalQuads() == 0) {
             return;
@@ -307,14 +309,22 @@ cc.ParticleBatchNode = cc.Node.extend(/** @lends cc.ParticleBatchNode# */{
         this._textureAtlas.setTexture(texture);
 
         // If the new texture has No premultiplied alpha, AND the blendFunc hasn't been changed, then update it
-        if (texture && !texture.hasPremultipliedAlpha() && ( m_tBlendFunc.src == CC_BLEND_SRC && m_tBlendFunc.dst == CC_BLEND_DST )) {
-            m_tBlendFunc.src = GL_SRC_ALPHA;
-            m_tBlendFunc.dst = GL_ONE_MINUS_SRC_ALPHA;
+        if (texture && !texture.hasPremultipliedAlpha() && ( m_tBlendFunc.src == gl.BLEND_SRC && m_tBlendFunc.dst == gl.BLEND_DST )) {
+            this._blendFunc.src = gl.SRC_ALPHA;
+            this._blendFunc.dst = gl.ONE_MINUS_SRC_ALPHA;
         }
     },
 
-    setBlendFunc:function (blendFunc) {
-        m_tBlendFunc = blendFunc;
+    /**
+     * set the blending function used for the texture
+     * @param {Number} src
+     * @param {Number} dst
+     */
+    setBlendFunc:function (src, dst) {
+        if(arguments.length == 1)
+            this._blendFunc = src;
+        else
+            this._blendFunc = {src:src, dst:dst};
     },
 
     /**
@@ -327,7 +337,8 @@ cc.ParticleBatchNode = cc.Node.extend(/** @lends cc.ParticleBatchNode# */{
 
     // override visit.
     // Don't call visit on it's children
-    visit:function (ctx) {
+    // XXX: Remove the "XXX_" prefix once WebGL is supported
+    XXX_visit:function (ctx) {
         // CAREFUL:
         // This visit is almost identical to cc.Node#visit
         // with the exception that it doesn't call visit on it's children
@@ -335,7 +346,7 @@ cc.ParticleBatchNode = cc.Node.extend(/** @lends cc.ParticleBatchNode# */{
         // The alternative is to have a void cc.Sprite#visit, but
         // although this is less mantainable, is faster
         //
-        if (!this._isVisible) {
+        if (!this._visible) {
             return;
         }
 
@@ -448,7 +459,7 @@ cc.ParticleBatchNode = cc.Node.extend(/** @lends cc.ParticleBatchNode# */{
 
         child.setParent(this);
 
-        if (this._isRunning) {
+        if (this._running) {
             child.onEnter();
             child.onEnterTransitionDidFinish();
         }
@@ -457,8 +468,8 @@ cc.ParticleBatchNode = cc.Node.extend(/** @lends cc.ParticleBatchNode# */{
 
     _updateBlendFunc:function () {
         if (!this._textureAtlas.getTexture().hasPremultipliedAlpha()) {
-            m_tBlendFunc.src = GL_SRC_ALPHA;
-            m_tBlendFunc.dst = GL_ONE_MINUS_SRC_ALPHA;
+            this._blendFunc.src = gl.SRC_ALPHA;
+            this._blendFunc.dst = gl.ONE_MINUS_SRC_ALPHA;
         }
     },
 
@@ -490,7 +501,7 @@ cc.ParticleBatchNode.createWithTexture = function (texture, capacity) {
  */
 cc.ParticleBatchNode.create = function (fileImage, capacity) {
     var ret = new cc.ParticleBatchNode();
-    if (ret && ret.initWithFile(fileImage, capacity)) {
+    if (ret && ret.init(fileImage, capacity)) {
         return ret;
     }
     return null;

@@ -97,7 +97,7 @@ cc.PointObject.create = function (ratio, offset) {
     var ret = new cc.PointObject();
     ret.initWithCCPoint(ratio, offset);
     return ret;
-}
+};
 
 /**
  * <p>cc.ParallaxNode: A node that simulates a parallax scroller<br />
@@ -172,7 +172,7 @@ cc.ParallaxNode = cc.Node.extend(/** @lends cc.ParallaxNode# */{
     removeChild:function (child, cleanup) {
         for (var i = 0; i < this._parallaxArray.length; i++) {
             var point = this._parallaxArray[i];
-            if (point.getChild().isEqual(child)) {
+            if (point.getChild() == child) {
                 this._parallaxArray.splice(i, 1);
                 break;
             }
@@ -184,7 +184,7 @@ cc.ParallaxNode = cc.Node.extend(/** @lends cc.ParallaxNode# */{
      *  Remove all children with cleanup
      * @param {Boolean} cleanup
      */
-    removeAllChildrenWithCleanup:function (cleanup) {
+    removeAllChildren:function (cleanup) {
         this._parallaxArray = [];
         this._super(cleanup);
     },
@@ -224,6 +224,5 @@ cc.ParallaxNode = cc.Node.extend(/** @lends cc.ParallaxNode# */{
  * var voidNode = cc.ParallaxNode.create();
  */
 cc.ParallaxNode.create = function () {
-    var ret = new cc.ParallaxNode();
-    return ret;
-}
+    return new cc.ParallaxNode();
+};

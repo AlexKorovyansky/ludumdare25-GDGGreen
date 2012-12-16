@@ -103,7 +103,7 @@ cc.renderContextType = cc.CANVAS;
  * save original size of canvas, use for resize canvas
  * @type cc.Size
  */
-cc.originalCanvasSize = new cc.Size(0, 0);
+cc.originalCanvasSize = cc.size(0, 0);
 
 window.requestAnimFrame = (function () {
     return  window.requestAnimationFrame ||
@@ -121,6 +121,9 @@ if (!window.console) {
     window.console.assert = function () {
     };
 }
+
+
+cc.isAddedHiddenEvent = false;
 
 /**
  * <p>
@@ -148,43 +151,103 @@ if (!window.console) {
 cc.setup = function (el, width, height) {
     var element = cc.$(el) || cc.$('#' + el);
     if (element.tagName == "CANVAS") {
+        width = width || element.width;
+        height = height || element.height;
+
         //it is already a canvas, we wrap it around with a div
         cc.container = cc.$new("DIV");
         cc.canvas = element;
         cc.canvas.parentNode.insertBefore(cc.container, cc.canvas);
         cc.canvas.appendTo(cc.container);
-        cc.container.style.width = (width || cc.canvas.width || 480) + "px";
-        cc.container.style.height = (height || cc.canvas.height || 320) + "px";
+        cc.container.style.width = (width || 480) + "px";
+        cc.container.style.height = (height || 320) + "px";
         cc.container.setAttribute('id', 'Cocos2dGameContainer');
-    }
-    else {//we must make a new canvas and place into this element
+        cc.canvas.setAttribute("width", width || 480);
+        cc.canvas.setAttribute("height", height || 320);
+    } else {//we must make a new canvas and place into this element
         if (element.tagName != "DIV") {
             cc.log("Warning: target element is not a DIV or CANVAS");
         }
+        width = width || parseInt(element.style.width);
+        height = height || parseInt(element.style.height);
+
         cc.canvas = cc.$new("CANVAS");
-        cc.canvas.addClass = "gameCanvas";
+        cc.canvas.addClass("gameCanvas");
         cc.canvas.setAttribute("width", width || 480);
         cc.canvas.setAttribute("height", height || 320);
         cc.container = element;
+        element.appendChild(cc.canvas);
+        cc.container.style.width = (width || 480) + "px";
+        cc.container.style.height = (height || 320) + "px";
     }
+    cc.container.style.position = 'relative';
+    cc.container.style.overflow = 'hidden';
+    cc.container.top = '100%';
     cc.renderContext = cc.canvas.getContext("2d");
     cc.renderContextType = cc.CANVAS;
     if (cc.renderContextType == cc.CANVAS) {
         cc.renderContext.translate(0, cc.canvas.height);
         cc.drawingUtil = new cc.DrawingPrimitiveCanvas(cc.renderContext);
     }
-    cc.originalCanvasSize = new cc.Size(cc.canvas.width, cc.canvas.height);
+    cc.originalCanvasSize = cc.size(cc.canvas.width, cc.canvas.height);
 
     cc.log(cc.ENGINE_VERSION);
+
+    cc.setContextMenuEnable(false);
 
     //binding window size
     /*
      cc.canvas.addEventListener("resize", function () {
      if (!cc.firstRun) {
-     cc.Director.getInstance().addRegionToDirtyRegion(new cc.Rect(0, 0, cc.canvas.width, cc.canvas.height));
+     cc.Director.getInstance().addRegionToDirtyRegion(cc.rect(0, 0, cc.canvas.width, cc.canvas.height));
      }
      }, true);
      */
+
+    var hidden, visibilityChange;
+    if (typeof document.hidden !== "undefined") {
+        hidden = "hidden";
+        visibilityChange = "visibilitychange";
+    } else if (typeof document.mozHidden !== "undefined") {
+        hidden = "mozHidden";
+        visibilityChange = "mozvisibilitychange";
+    } else if (typeof document.msHidden !== "undefined") {
+        hidden = "msHidden";
+        visibilityChange = "msvisibilitychange";
+    } else if (typeof document.webkitHidden !== "undefined") {
+        hidden = "webkitHidden";
+        visibilityChange = "webkitvisibilitychange";
+    }
+
+    function handleVisibilityChange() {
+        if (!document[hidden])
+            cc.Director.getInstance()._resetLastUpdate();
+    }
+
+    if (typeof document.addEventListener === "undefined" ||
+        typeof hidden === "undefined") {
+        cc.isAddedHiddenEvent = false;
+    } else {
+        cc.isAddedHiddenEvent = true;
+        document.addEventListener(visibilityChange, handleVisibilityChange, false);
+    }
+};
+
+cc._isContextMenuEnable = false;
+/**
+ * enable/disable contextMenu for Canvas
+ * @param {Boolean} enabled
+ */
+cc.setContextMenuEnable = function (enabled) {
+    cc._isContextMenuEnable = enabled;
+    if (!cc._isContextMenuEnable) {
+        cc.canvas.oncontextmenu = function () {
+            event.returnValue = false;
+        };
+    } else {
+        cc.canvas.oncontextmenu = function () {
+        };
+    }
 };
 
 /**
@@ -218,7 +281,7 @@ cc.Application = cc.Class.extend(/** @lends cc.Application# */{
     statusBarFrame:function (rect) {
         if (rect) {
             // Windows doesn't have status bar.
-            rect = cc.RectMake(0, 0, 0, 0);
+            rect = cc.rect(0, 0, 0, 0);
         }
     },
 
@@ -232,7 +295,7 @@ cc.Application = cc.Class.extend(/** @lends cc.Application# */{
             return 0;
         }
         // TODO, need to be fixed.
-        if (window.requestAnimFrame) {
+        if (window.requestAnimFrame && this._animationInterval == 1 / 60) {
             var callback = function () {
                 cc.Director.getInstance().mainLoop();
                 window.requestAnimFrame(callback);

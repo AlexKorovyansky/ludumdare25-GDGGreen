@@ -147,11 +147,11 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
     // lazy alloc,
     _camera:null,
     _grid:null,
-    _isVisible:true,
+    _visible:true,
     _anchorPoint:cc.p(0, 0),
     _anchorPointInPoints:cc.p(0, 0),
     _contentSize:cc.SizeZero(),
-    _isRunning:false,
+    _running:false,
     _parent:null,
     // "whole screen" objects. like Scenes and Layers, should set _ignoreAnchorPointForPosition to true
     _ignoreAnchorPointForPosition:false,
@@ -159,10 +159,10 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
     // userData is always inited as nil
     _userData:null,
     _userObject:null,
-    _isTransformDirty:true,
-    _isInverseDirty:true,
-    _isCacheDirty:true,
-    _isTransformGLDirty:null,
+    _transformDirty:true,
+    _inverseDirty:true,
+    _cacheDirty:true,
+    _transformGLDirty:null,
     _transform:null,
     _inverse:null,
     //since 2.0 api
@@ -173,23 +173,40 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
     _actionManager:null,
     _scheduler:null,
 
+    _initializedNode:false,
+
     /**
      * Constructor
      */
     ctor:function () {
+        this._initNode();
+    },
+
+    _initNode:function () {
         if (cc.NODE_TRANSFORM_USING_AFFINE_MATRIX) {
-            this._isTransformGLDirty = true;
+            this._transformGLDirty = true;
         }
         this._anchorPoint = cc.p(0, 0);
         this._anchorPointInPoints = cc.p(0, 0);
-        this._contentSize = new cc.Size(0, 0);
-        this._position = cc.p(0,0);
+        this._contentSize = cc.size(0, 0);
+        this._position = cc.p(0, 0);
 
         var director = cc.Director.getInstance();
         this._actionManager = director.getActionManager();
-        this.getActionManager = function(){return this._actionManager;} ;
+        this.getActionManager = function () {
+            return this._actionManager;
+        };
         this._scheduler = director.getScheduler();
-        this.getScheduler = function(){return this._scheduler;}
+        this.getScheduler = function () {
+            return this._scheduler;
+        };
+        this._initializedNode = true;
+    },
+
+    init:function () {
+        if (this._initializedNode === false)
+            this._initNode();
+        return true;
     },
 
     /**
@@ -263,7 +280,7 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
 
     _isInDirtyRegion:function () {
         //if (!cc.firstRun) {
-        //    return cc.Director.getInstance().rectIsInDirtyRegion(this.boundingBoxToWorld());
+        //    return cc.Director.getInstance().rectIsInDirtyRegion(this.getBoundingBoxToWorld());
         //}
     },
 
@@ -272,14 +289,14 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
      */
     setNodeDirty:function () {
         this._setNodeDirtyForCache();
-        this._isTransformDirty = this._isInverseDirty = true;
+        this._transformDirty = this._inverseDirty = true;
         if (cc.NODE_TRANSFORM_USING_AFFINE_MATRIX) {
-            this._isTransformGLDirty = true;
+            this._transformGLDirty = true;
         }
     },
 
     _setNodeDirtyForCache:function () {
-        this._isCacheDirty = true;
+        this._cacheDirty = true;
         if (this._parent) {
             this._parent._setNodeDirtyForCache();
         }
@@ -299,12 +316,12 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
      */
     setSkewX:function (newSkewX) {
         //save dirty region when before change
-        //this._addDirtyRegionToDirector(this.boundingBoxToWorld());
+        //this._addDirtyRegionToDirector(this.getBoundingBoxToWorld());
 
         this._skewX = newSkewX;
 
         //save dirty region when after changed
-        //this._addDirtyRegionToDirector(this.boundingBoxToWorld());
+        //this._addDirtyRegionToDirector(this.getBoundingBoxToWorld());
         this.setNodeDirty();
     },
 
@@ -321,11 +338,11 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
      */
     setSkewY:function (newSkewY) {
         //save dirty region when before change
-        //this._addDirtyRegionToDirector(this.boundingBoxToWorld());
+        //this._addDirtyRegionToDirector(this.getBoundingBoxToWorld());
 
         this._skewY = newSkewY;
         //save dirty region when after changed
-        //this._addDirtyRegionToDirector(this.boundingBoxToWorld());
+        //this._addDirtyRegionToDirector(this.getBoundingBoxToWorld());
         this.setNodeDirty();
     },
 
@@ -343,7 +360,7 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
      * @private
      */
     _setZOrder:function (z) {
-        this._zOrder = z
+        this._zOrder = z;
     },
 
     setZOrder:function (z) {
@@ -383,15 +400,11 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
      * @param {Number} newRotation
      */
     setRotation:function (newRotation) {
-        if(this._rotation == newRotation)
-            return ;
-        //save dirty region when before change
-        //this._addDirtyRegionToDirector(this.boundingBoxToWorld());
-
+        if (this._rotation == newRotation)
+            return;
         this._rotation = newRotation;
         this._rotationRadians = this._rotation * (Math.PI / 180);
-        //save dirty region when after changed
-        //this._addDirtyRegionToDirector(this.boundingBoxToWorld());
+
         this.setNodeDirty();
     },
 
@@ -409,15 +422,15 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
      * @param {Number} scale or scaleX value
      * @param {Number} scaleY
      */
-    setScale:function (scale,scaleY) {
+    setScale:function (scale, scaleY) {
         //save dirty region when before change
-        //this._addDirtyRegionToDirector(this.boundingBoxToWorld());
+        //this._addDirtyRegionToDirector(this.getBoundingBoxToWorld());
 
         this._scaleX = scale;
         this._scaleY = scaleY || scale;
 
         //save dirty region when after changed
-        //this._addDirtyRegionToDirector(this.boundingBoxToWorld());
+        //this._addDirtyRegionToDirector(this.getBoundingBoxToWorld());
         this.setNodeDirty();
     },
 
@@ -435,12 +448,12 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
      */
     setScaleX:function (newScaleX) {
         //save dirty region when before change
-        //this._addDirtyRegionToDirector(this.boundingBoxToWorld());
+        //this._addDirtyRegionToDirector(this.getBoundingBoxToWorld());
 
         this._scaleX = newScaleX;
 
         //save dirty region when after changed
-        //this._addDirtyRegionToDirector(this.boundingBoxToWorld());
+        //this._addDirtyRegionToDirector(this.getBoundingBoxToWorld());
         this.setNodeDirty();
     },
 
@@ -458,12 +471,12 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
      */
     setScaleY:function (newScaleY) {
         //save dirty region when before change
-        //this._addDirtyRegionToDirector(this.boundingBoxToWorld());
+        //this._addDirtyRegionToDirector(this.getBoundingBoxToWorld());
 
         this._scaleY = newScaleY;
 
         //save dirty region when after changed
-        //this._addDirtyRegionToDirector(this.boundingBoxToWorld());
+        //this._addDirtyRegionToDirector(this.getBoundingBoxToWorld());
         this.setNodeDirty();
     },
 
@@ -474,17 +487,28 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
      */
     setPosition:function (newPosOrxValue, yValue) {
         //save dirty region when before change
-        //this._addDirtyRegionToDirector(this.boundingBoxToWorld());
-        if (yValue) {
+        //this._addDirtyRegionToDirector(this.getBoundingBoxToWorld());
+        if (arguments.length == 2) {
+            this._position = new cc.Point(newPosOrxValue, yValue);
+            //this.setPosition = this._setPositionByValue;
+        } else if (arguments.length == 1) {
+            this._position = new cc.Point(newPosOrxValue.x, newPosOrxValue.y);
+            //this.setPosition = this._setPositionByValue;
+        }
+        //save dirty region when after changed
+        //this._addDirtyRegionToDirector(this.getBoundingBoxToWorld());
+        this.setNodeDirty();
+    },
+
+    _setPositionByValue:function (newPosOrxValue, yValue) {
+        if (arguments.length == 2) {
             this._position.x = newPosOrxValue;
             this._position.y = yValue;
             //this._position = cc.p(newPosOrxValue,yValue);
-        } else if (newPosOrxValue instanceof  cc.Point) {
-            this._position = newPosOrxValue;
+        } else if (arguments.length == 1) {
+            this._position.x = newPosOrxValue.x;
+            this._position.y = newPosOrxValue.y;
         }
-
-        //save dirty region when after changed
-        //this._addDirtyRegionToDirector(this.boundingBoxToWorld());
         this.setNodeDirty();
     },
 
@@ -587,7 +611,7 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
      * @return {Boolean}
      */
     isVisible:function () {
-        return this._isVisible;
+        return this._visible;
     },
 
     /**
@@ -595,8 +619,8 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
      * @param {Boolean} Var
      */
     setVisible:function (Var) {
-        this._isVisible = Var;
-        //this._addDirtyRegionToDirector(this.boundingBoxToWorld());
+        this._visible = Var;
+        //this._addDirtyRegionToDirector(this.getBoundingBoxToWorld());
         this.setNodeDirty();
     },
 
@@ -616,14 +640,25 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
     setAnchorPoint:function (point) {
         if (!cc.Point.CCPointEqualToPoint(point, this._anchorPoint)) {
             //save dirty region when before change
-            //this._addDirtyRegionToDirector(this.boundingBoxToWorld());
+            //this._addDirtyRegionToDirector(this.getBoundingBoxToWorld());
 
-            this._anchorPoint = point;
-            this._anchorPointInPoints = cc.p(this._contentSize.width * this._anchorPoint.x,
-                this._contentSize.height * this._anchorPoint.y);
+            this._anchorPoint = new cc.Point(point.x, point.y);
+            this._anchorPointInPoints = new cc.Point(this._contentSize.width * this._anchorPoint.x, this._contentSize.height * this._anchorPoint.y);
+
+            //this.setAnchorPoint = this._setAnchorPointByValue;
 
             //save dirty region when after changed
-            //this._addDirtyRegionToDirector(this.boundingBoxToWorld());
+            //this._addDirtyRegionToDirector(this.getBoundingBoxToWorld());
+            this.setNodeDirty();
+        }
+    },
+
+    _setAnchorPointByValue:function (point) {
+        if (!cc.Point.CCPointEqualToPoint(point, this._anchorPoint)) {
+            this._anchorPoint.x = point.x;
+            this._anchorPoint.y = point.y;
+            this._anchorPointInPoints.x = this._contentSize.width * this._anchorPoint.x;
+            this._anchorPointInPoints.y = this._contentSize.height * this._anchorPoint.y;
             this.setNodeDirty();
         }
     },
@@ -641,7 +676,7 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
      * @return {cc.Size}
      */
     getContentSize:function () {
-        return new cc.Size(this._contentSize.width, this._contentSize.height);
+        return cc.size(this._contentSize.width, this._contentSize.height);
     },
 
     /**
@@ -650,13 +685,22 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
     setContentSize:function (size) {
         if (!cc.Size.CCSizeEqualToSize(size, this._contentSize)) {
             //save dirty region when before change
-            //this._addDirtyRegionToDirector(this.boundingBoxToWorld());
-            this._contentSize = size;
-
-            this._anchorPointInPoints = cc.p(this._contentSize.width * this._anchorPoint.x,
-                this._contentSize.height * this._anchorPoint.y);
+            //this._addDirtyRegionToDirector(this.getBoundingBoxToWorld());
+            this._contentSize = new cc.Size(size.width, size.height);
+            this._anchorPointInPoints = new cc.Point(this._contentSize.width * this._anchorPoint.x, this._contentSize.height * this._anchorPoint.y);
             //save dirty region when before change
-            //this._addDirtyRegionToDirector(this.boundingBoxToWorld());
+            //this._addDirtyRegionToDirector(this.getBoundingBoxToWorld());
+            //this.setContentSize = this._setContentSizeByValue;
+            this.setNodeDirty();
+        }
+    },
+
+    _setContentSizeByValue:function (size) {
+        if (!cc.Size.CCSizeEqualToSize(size, this._contentSize)) {
+            this._contentSize.width = size.width;
+            this._contentSize.height = size.height;
+            this._anchorPointInPoints.x = this._contentSize.width * this._anchorPoint.x;
+            this._anchorPointInPoints.y = this._contentSize.height * this._anchorPoint.y;
             this.setNodeDirty();
         }
     },
@@ -666,7 +710,7 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
      * @return {Boolean}
      */
     isRunning:function () {
-        return this._isRunning;
+        return this._running;
     },
 
     /** parent getter
@@ -683,25 +727,25 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
         this._parent = Var;
     },
 
-    /** isIgnoreAnchorPointForPosition getter
+    /** ignoreAnchorPointForPosition getter
      * @return {Boolean}
      */
     isIgnoreAnchorPointForPosition:function () {
         return this._ignoreAnchorPointForPosition;
     },
 
-    /** isRelativeAnchorPoint setter
+    /** ignoreAnchorPointForPosition setter
      * @param {Boolean} newValue
      */
     ignoreAnchorPointForPosition:function (newValue) {
         if (newValue != this._ignoreAnchorPointForPosition) {
             //save dirty region when before change
-            //this._addDirtyRegionToDirector(this.boundingBoxToWorld());
+            //this._addDirtyRegionToDirector(this.getBoundingBoxToWorld());
 
             this._ignoreAnchorPointForPosition = newValue;
 
             //save dirty region when before change
-            //this._addDirtyRegionToDirector(this.boundingBoxToWorld());
+            //this._addDirtyRegionToDirector(this.getBoundingBoxToWorld());
             this.setNodeDirty();
         }
     },
@@ -811,7 +855,9 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
     getActionManager:function () {
         if (!this._actionManager) {
             this._actionManager = cc.Director.getInstance().getActionManager();
-            this.getActionManager = function(){return this._actionManager;} ;
+            this.getActionManager = function () {
+                return this._actionManager;
+            };
         }
 
         return this._actionManager;
@@ -837,9 +883,11 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
      * @return {cc.Scheduler}
      */
     getScheduler:function () {
-        if (!this._scheduler){
+        if (!this._scheduler) {
             this._scheduler = cc.Director.getInstance().getScheduler();
-            this.getScheduler = function(){return this._scheduler;} ;
+            this.getScheduler = function () {
+                return this._scheduler;
+            };
         }
         return this._scheduler;
     },
@@ -849,39 +897,38 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
      *   cc.Scheduler used to schedule all "updates" and timers.<br/>
      *   IMPORTANT: If you set a new cc.Scheduler, then previously created timers/update are going to be removed.
      * </p>
-     * @return {cc.Scheduler}
      */
     setScheduler:function (scheduler) {
         if (this._scheduler != scheduler) {
-            this.unscheduleAllSelectors();
+            this.unscheduleAllCallbacks();
             this._scheduler = scheduler;
         }
     },
 
     /** returns a "local" axis aligned bounding box of the node. <br/>
      * The returned box is relative only to its parent.
-     * @return {Number}
+     * @return {cc.Rect}
      */
-    boundingBox:function () {
-        var rect = cc.RectMake(0, 0, this._contentSize.width, this._contentSize.height);
+    getBoundingBox:function () {
+        var rect = cc.rect(0, 0, this._contentSize.width, this._contentSize.height);
         return cc.RectApplyAffineTransform(rect, this.nodeToParentTransform());
     },
 
-    /**
+    /** returns a "world" axis aligned bounding box of the node. <br/>
      * @return {cc.Rect}
      */
-    boundingBoxToWorld:function () {
-        var rect = cc.RectMake(0, 0, this._contentSize.width, this._contentSize.height);
+    getBoundingBoxToWorld:function () {
+        var rect = cc.rect(0, 0, this._contentSize.width, this._contentSize.height);
         rect = cc.RectApplyAffineTransform(rect, this.nodeToWorldTransform());
-        rect = new cc.Rect(0 | rect.origin.x - 4, 0 | rect.origin.y - 4, 0 | rect.size.width + 8, 0 | rect.size.height + 8);
-        //query child's boundingBox
+        rect = cc.rect(0 | rect.origin.x - 4, 0 | rect.origin.y - 4, 0 | rect.size.width + 8, 0 | rect.size.height + 8);
+        //query child's BoundingBox
         if (!this._children)
             return rect;
 
         for (var i = 0; i < this._children.length; i++) {
             var child = this._children[i];
-            if (child && child._isVisible) {
-                var childRect = child.boundingBoxToWorld();
+            if (child && child._visible) {
+                var childRect = child.getBoundingBoxToWorld();
                 if (childRect) {
                     rect = cc.Rect.CCRectUnion(rect, childRect);
                 }
@@ -895,13 +942,13 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
     cleanup:function () {
         // actions
         this.stopAllActions();
-        this.unscheduleAllSelectors();
+        this.unscheduleAllCallbacks();
 
         // timers
         this._arrayMakeObjectsPerformSelector(this._children, cc.Node.StateCallbackType.cleanup);
     },
 
-    /**
+    /** Node description
      * @return {String}
      */
     description:function () {
@@ -943,7 +990,11 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
      * @param {Number} tag
      */
     addChild:function (child, zOrder, tag) {
-        var argnum = arguments.length;
+        if (child === this) {
+            console.warn('cc.Node.addChild: An Node can\'t be added as a child of itself.');
+            return;
+        }
+
         cc.Assert(child != null, "Argument must be non-nil");
         cc.Assert(child._parent == null, "child already added. It can't be added again");
         var tempzOrder = (zOrder != null) ? zOrder : child.getZOrder();
@@ -957,7 +1008,7 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
         this._insertChild(child, tempzOrder);
 
         child.setParent(this);
-        if (this._isRunning) {
+        if (this._running) {
             child.onEnter();
             child.onEnterTransitionDidFinish();
         }
@@ -966,18 +1017,26 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
 
     // composition: REMOVE
     /** Remove itself from its parent node. If cleanup is true, then also remove all actions and callbacks. <br/>
-     *  If the node orphan, then nothing happens.
+     * If the cleanup parameter is not passed, it will force a cleanup. <br/>
+     * If the node orphan, then nothing happens.
      * @param {Boolean} cleanup
      */
-    removeFromParentAndCleanup:function (cleanup) {
-        if (this._parent)
+    removeFromParent:function (cleanup) {
+        if (this._parent) {
+            cleanup = cleanup || true;
             this._parent.removeChild(this, cleanup);
+        }
+    },
+    /** XXX deprecated */
+    removeFromParentAndCleanup:function (cleanup) {
+        cc.log("removeFromParentAndCleanup is deprecated. Use removeFromParent instead");
+        this.removeFromParent(cleanup);
     },
 
     /** <p>Removes a child from the container. It will also cleanup all running actions depending on the cleanup parameter. </p>
-     *
+     * If the cleanup parameter is not passed, it will force a cleanup. <br/>
      *<p> "remove" logic MUST only be on this method  <br/>
-     * If a class want's to extend the 'removeChild' behavior it only needs <br/>
+     * If a class wants to extend the 'removeChild' behavior it only needs <br/>
      * to override this method </p>
      *
      * @param {cc.Node} child
@@ -989,16 +1048,17 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
             return;
         }
 
+        cleanup = cleanup || true;
         if (this._children.indexOf(child) > -1) {
             this._detachChild(child, cleanup);
         }
 
-        //this._addDirtyRegionToDirector(this.boundingBoxToWorld());
         this.setNodeDirty();
     },
 
     /**
-     * Removes a child from the container by tag value. It will also cleanup all running actions depending on the cleanup parameter
+     * Removes a child from the container by tag value. It will also cleanup all running actions depending on the cleanup parameter.
+     * If the cleanup parameter is not passed, it will force a cleanup. <br/>
      * @param {Number} tag
      * @param {Boolean} cleanup
      */
@@ -1008,37 +1068,43 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
         var child = this.getChildByTag(tag);
         if (child == null) {
             cc.log("cocos2d: removeChildByTag: child not found!");
-        }
-        else {
+        } else {
             this.removeChild(child, cleanup);
         }
     },
 
+    /* XXX deprecated */
+    removeAllChildrenWithCleanup:function (cleanup) {
+        cc.log("removeAllChildrenWithCleanup is deprecated. Use removeAllChildren instead");
+        this.removeAllChildren(cleanup);
+    },
+
     /**
      * Removes all children from the container and do a cleanup all running actions depending on the cleanup parameter.
+     * If the cleanup parameter is not passed, it will force a cleanup. <br/>
      * @param {Boolean} cleanup
      */
-    removeAllChildrenWithCleanup:function (cleanup) {
+    removeAllChildren:function (cleanup) {
         // not using detachChild improves speed here
         if (this._children != null) {
+            cleanup = cleanup || true;
             for (var i = 0; i < this._children.length; i++) {
                 var node = this._children[i];
                 if (node) {
                     // IMPORTANT:
                     //  -1st do onExit
                     //  -2nd cleanup
-                    if (this._isRunning) {
+                    if (this._running) {
                         node.onExitTransitionDidStart();
                         node.onExit();
                     }
-                    if (cleanup) {
+                    if (cleanup)
                         node.cleanup();
-                    }
                     // set parent nil at the end
                     node.setParent(null);
                 }
             }
-            this._children = [];
+            this._children.length = 0;
         }
     },
 
@@ -1051,7 +1117,7 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
         // IMPORTANT:
         //  -1st do onExit
         //  -2nd cleanup
-        if (this._isRunning) {
+        if (this._running) {
             child.onExitTransitionDidStart();
             child.onExit();
         }
@@ -1100,13 +1166,13 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
         this._reorderChildDirty = true;
 
         //save dirty region when before change
-        //this._addDirtyRegionToDirector(this.boundingBoxToWorld());
+        //this._addDirtyRegionToDirector(this.getBoundingBoxToWorld());
 
         child.setOrderOfArrival(cc.s_globalOrderOfArrival++);
         child._setZOrder(zOrder);
 
         //save dirty region when after changed
-        //this._addDirtyRegionToDirector(this.boundingBoxToWorld());
+        //this._addDirtyRegionToDirector(this.getBoundingBoxToWorld());
         this.setNodeDirty();
     },
 
@@ -1162,93 +1228,87 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
      * @param {CanvasContext} ctx
      */
     visit:function (ctx) {
+        //visit for canvas
+
         // quick return if not visible
-        if (!this._isVisible) {
+        if (!this._visible)
             return;
+
+        var context = ctx || cc.renderContext, i;
+        context.save();
+        this.transform(context);
+        if (this._children && this._children.length > 0) {
+            this.sortAllChildren();
+            // draw children zOrder < 0
+            for (i = 0; i < this._children.length; i++) {
+                if (this._children[i] && this._children[i]._zOrder < 0)
+                    this._children[i].visit(context);
+                else
+                    break;
+            }
+            this.draw(context);
+            if (this._children) {
+                for (; i < this._children.length; i++) {
+                    if (this._children[i] && this._children[i]._zOrder >= 0)
+                        this._children[i].visit(context);
+                }
+            }
+        } else
+            this.draw(context);
+
+        this._orderOfArrival = 0;
+        context.restore();
+    },
+
+    _visitForWebGL:function (ctx) {
+        if (!this._visible)
+            return;
+
+        var context = ctx, i;
+
+        context.save();
+
+        if (this._grid && this._grid.isActive()) {
+            this._grid.beforeDraw();
         }
 
-        var context = ctx || cc.renderContext;
-        var i;
+        this.transform(context);
+        if (this._children && this._children.length > 0) {
+            this.sortAllChildren();
+            // draw children zOrder < 0
+            for (i = 0; i < this._children.length; i++) {
+                if (this._children[i] && this._children[i]._zOrder < 0) {
+                    this._children[i].visit(context);
+                } else {
+                    break;
+                }
+            }
 
-        if(cc.renderContextType == cc.CANVAS){
-            context.save();
-            this.transform(context);
+            //if (this._isInDirtyRegion()) {
+            // self draw
+            this.draw(context);
+            //}
 
-            if (this._children && this._children.length > 0) {
-                this.sortAllChildren();
-                // draw children zOrder < 0
-                for (i = 0; i < this._children.length; i++) {
-                    if (this._children[i] && this._children[i]._zOrder < 0) {
+            // draw children zOrder >= 0
+            if (this._children) {
+                for (; i < this._children.length; i++) {
+                    if (this._children[i] && this._children[i]._zOrder >= 0) {
                         this._children[i].visit(context);
-                    } else {
-                        break;
                     }
                 }
-                //if (this._isInDirtyRegion()) {
-                // self draw
-                this.draw(context);
-                //}
-                // draw children zOrder >= 0
-                if (this._children) {
-                    for (; i < this._children.length; i++) {
-                        if (this._children[i] && this._children[i]._zOrder >= 0) {
-                            this._children[i].visit(context);
-                        }
-                    }
-                }
-            } else {
-                //if (this._isInDirtyRegion()) {
-                // self draw
-                this.draw(context);
-                //}
             }
-            this._orderOfArrival = 0;
-            context.restore();
-        } else{
-            if (this._grid && this._grid.isActive()) {
-                this._grid.beforeDraw();
-            }
-
-            this.transform(context);
-            if (this._children && this._children.length > 0) {
-                this.sortAllChildren();
-                // draw children zOrder < 0
-                for (i = 0; i < this._children.length; i++) {
-                    if (this._children[i] && this._children[i]._zOrder < 0) {
-                        this._children[i].visit(context);
-                    } else {
-                        break;
-                    }
-                }
-
-                //if (this._isInDirtyRegion()) {
-                // self draw
-                this.draw(context);
-                //}
-
-                // draw children zOrder >= 0
-                if (this._children) {
-                    for (; i < this._children.length; i++) {
-                        if (this._children[i] && this._children[i]._zOrder >= 0) {
-                            this._children[i].visit(context);
-                        }
-                    }
-                }
-            } else {
-                //if (this._isInDirtyRegion()) {
-                // self draw
-                this.draw(context);
-                //}
-            }
-
-            this._orderOfArrival = 0;
-
-            if (this._grid && this._grid.isActive()) {
-                this._grid.afterDraw(this);
-            }
-
-            context.restore();
+        } else {
+            //if (this._isInDirtyRegion()) {
+            // self draw
+            this.draw(context);
+            //}
         }
+
+        this._orderOfArrival = 0;
+        if (this._grid && this._grid.isActive()) {
+            this._grid.afterDraw(this);
+        }
+        context.restore();
     },
 
     /** performs OpenGL view-matrix transformation of it's ancestors.<br/>
@@ -1267,66 +1327,66 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
      * @param {CanvasContext} ctx
      */
     transform:function (ctx) {
+        // transform for canvas
         var context = ctx || cc.renderContext;
+
         // transformations
-        if (cc.renderContextType == cc.CANVAS) {
-            if (!this._ignoreAnchorPointForPosition) {
-                if (this._parent) {
-                    context.translate(0 | (this._position.x - this._parent._anchorPointInPoints.x), -(0 | (this._position.y - this._parent._anchorPointInPoints.y)));
-                } else {
-                    context.translate(0 | this._position.x, -(0 | this._position.y));
-                }
-            } else {
-                if (this._parent) {
-                    context.translate(0 | ( this._position.x - this._parent._anchorPointInPoints.x + this._anchorPointInPoints.x),
-                        -(0 | (this._position.y - this._parent._anchorPointInPoints.y + this._anchorPointInPoints.y)));
-                } else {
-                    context.translate(0 | ( this._position.x  + this._anchorPointInPoints.x), -(0 | (this._position.y + this._anchorPointInPoints.y)));
-                }
-            }
-
-            if (this._rotation != 0) {
-                //context.rotate(cc.DEGREES_TO_RADIANS(this._rotation));
-                context.rotate(this._rotationRadians);
-            }
-
-            if ((this._scaleX != 1) || (this._scaleY != 1)) {
-                context.scale(this._scaleX, this._scaleY);
-            }
-
-            if ((this._skewX != 0) || (this._skewY != 0)) {
-                context.transform(1,
-                    -Math.tan(cc.DEGREES_TO_RADIANS(this._skewY)),
-                    -Math.tan(cc.DEGREES_TO_RADIANS(this._skewX)),
-                    1, 0, 0);
-            }
+        if (!this._ignoreAnchorPointForPosition) {
+            if (this._parent)
+                context.translate(0 | (this._position.x - this._parent._anchorPointInPoints.x), -(0 | (this._position.y - this._parent._anchorPointInPoints.y)));
+            else
+                context.translate(0 | this._position.x, -(0 | this._position.y));
         } else {
-            //Todo WebGL implement need fixed
-            var transfrom4x4;
-
-            // Convert 3x3 into 4x4 matrix
-            var tmpAffine = this.nodeToParentTransform();
-            //CGAffineToGL(&tmpAffine, transfrom4x4.mat);
-
-            // Update Z vertex manually
-            //transfrom4x4.mat[14] = m_fVertexZ;
-
-            //kmGLMultMatrix( &transfrom4x4 );
-
-
-            // XXX: Expensive calls. Camera should be integrated into the cached affine matrix
-            /*if ( m_pCamera != NULL && !(m_pGrid != NULL && m_pGrid->isActive()) ) {
-             bool translate = (m_tAnchorPointInPoints.x != 0.0f || m_tAnchorPointInPoints.y != 0.0f);
-
-             if( translate )
-             kmGLTranslatef(RENDER_IN_SUBPIXEL(m_tAnchorPointInPoints.x), RENDER_IN_SUBPIXEL(m_tAnchorPointInPoints.y), 0 );
-
-             m_pCamera->locate();
-
-             if( translate )
-             kmGLTranslatef(RENDER_IN_SUBPIXEL(-m_tAnchorPointInPoints.x), RENDER_IN_SUBPIXEL(-m_tAnchorPointInPoints.y), 0 );
-             }*/
+            if (this._parent) {
+                context.translate(0 | ( this._position.x - this._parent._anchorPointInPoints.x + this._anchorPointInPoints.x),
+                    -(0 | (this._position.y - this._parent._anchorPointInPoints.y + this._anchorPointInPoints.y)));
+            } else {
+                context.translate(0 | ( this._position.x + this._anchorPointInPoints.x), -(0 | (this._position.y + this._anchorPointInPoints.y)));
+            }
         }
+
+        if (this._rotation != 0)
+            context.rotate(this._rotationRadians);
+
+        if ((this._scaleX != 1) || (this._scaleY != 1))
+            context.scale(this._scaleX, this._scaleY);
+
+        if ((this._skewX != 0) || (this._skewY != 0)) {
+            context.transform(1,
+                -Math.tan(cc.DEGREES_TO_RADIANS(this._skewY)),
+                -Math.tan(cc.DEGREES_TO_RADIANS(this._skewX)),
+                1, 0, 0);
+        }
+    },
+
+    _transformForWebGL:function (ctx) {
+        var context = ctx;
+
+        //Todo WebGL implement need fixed
+        var transfrom4x4;
+
+        // Convert 3x3 into 4x4 matrix
+        var tmpAffine = this.nodeToParentTransform();
+        //CGAffineToGL(&tmpAffine, transfrom4x4.mat);
+
+        // Update Z vertex manually
+        //transfrom4x4.mat[14] = m_fVertexZ;
+
+        //kmGLMultMatrix( &transfrom4x4 );
+
+
+        // XXX: Expensive calls. Camera should be integrated into the cached affine matrix
+        /*if ( m_pCamera != NULL && !(m_pGrid != NULL && m_pGrid->isActive()) ) {
+         bool translate = (m_tAnchorPointInPoints.x != 0.0f || m_tAnchorPointInPoints.y != 0.0f);
+
+         if( translate )
+         kmGLTranslatef(RENDER_IN_SUBPIXEL(m_tAnchorPointInPoints.x), RENDER_IN_SUBPIXEL(m_tAnchorPointInPoints.y), 0 );
+
+         m_pCamera->locate();
+
+         if( translate )
+         kmGLTranslatef(RENDER_IN_SUBPIXEL(-m_tAnchorPointInPoints.x), RENDER_IN_SUBPIXEL(-m_tAnchorPointInPoints.y), 0 );
+         }*/
     },
 
     //scene managment
@@ -1336,9 +1396,9 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
      * During onEnter you can't a "sister/brother" node.
      */
     onEnter:function () {
+        this._running = true;//should be running before resumeSchedule
         this._arrayMakeObjectsPerformSelector(this._children, cc.Node.StateCallbackType.onEnter);
         this.resumeSchedulerAndActions();
-        this._isRunning = true;
     },
 
     /**
@@ -1363,8 +1423,8 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
      * During onExit you can't access a sibling node.
      */
     onExit:function () {
+        this._running = false;
         this.pauseSchedulerAndActions();
-        this._isRunning = false;
         this._arrayMakeObjectsPerformSelector(this._children, cc.Node.StateCallbackType.onExit);
     },
 
@@ -1378,7 +1438,7 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
      */
     runAction:function (action) {
         cc.Assert(action != null, "Argument must be non-nil");
-        this.getActionManager().addAction(action, this, !this._isRunning);
+        this.getActionManager().addAction(action, this, !this._running);
         return action;
     },
 
@@ -1438,13 +1498,13 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
     },
 
     /**
-     * schedules the "update" selector with a custom priority. This selector will be called every frame.<br/>
-     * Scheduled selectors with a lower priority will be called before the ones that have a higher value.<br/>
-     * Only one "update" selector could be scheduled per node (You can't have 2 'update' selectors).<br/>
+     * schedules the "update" callback function with a custom priority. This callback function will be called every frame.<br/>
+     * Scheduled callback functions with a lower priority will be called before the ones that have a higher value.<br/>
+     * Only one "update" callback function could be scheduled per node (You can't have 2 'update' callback functions).<br/>
      * @param {Number} priority
      */
     scheduleUpdateWithPriority:function (priority) {
-        this.getScheduler().scheduleUpdateForTarget(this, priority, !this._isRunning);
+        this.getScheduler().scheduleUpdateForTarget(this, priority, !this._running);
     },
 
     /**
@@ -1455,53 +1515,53 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
     },
 
     /**
-     * schedule
-     * @param {function} selector
+     * schedules a callback function with interval, repeat and delay.
+     * @param {function} callback_fn
      * @param {Number} interval
      */
-    schedule:function (selector, interval, repeat, delay) {
+    schedule:function (callback_fn, interval, repeat, delay) {
         interval = interval || 0;
 
-        cc.Assert(selector, "Argument must be non-nil");
+        cc.Assert(callback_fn, "Argument must be non-nil");
         cc.Assert(interval >= 0, "Argument must be positive");
 
         repeat = (repeat == null) ? cc.REPEAT_FOREVER : repeat;
         delay = delay || 0;
 
-        this.getScheduler().scheduleSelector(selector, this, interval, !this._isRunning, repeat, delay);
+        this.getScheduler().scheduleCallbackForTarget(this, callback_fn, interval, repeat, delay, !this._running);
     },
 
     /**
-     * Schedules a selector that runs only once, with a delay of 0 or larger
-     * @param {cc.Class} selector
+     * Schedules a callback function that runs only once, with a delay of 0 or larger
+     * @param {cc.Class} callback_fn
      * @param {Number} delay
      */
-    scheduleOnce:function (selector, delay) {
-        this.schedule(selector, 0.0, 0, delay);
+    scheduleOnce:function (callback_fn, delay) {
+        this.schedule(callback_fn, 0.0, 0, delay);
     },
 
     /**
-     * unschedules a custom selector.
-     * @param {function} selector
+     * unschedules a custom callback function.
+     * @param {function} callback_fn
      */
-    unschedule:function (selector) {
+    unschedule:function (callback_fn) {
         // explicit nil handling
-        if (!selector)
+        if (!callback_fn)
             return;
 
-        this.getScheduler().unscheduleSelector(selector, this);
+        this.getScheduler().unscheduleCallbackForTarget(this, callback_fn);
     },
 
     /**
-     * unschedule all scheduled selectors: custom selectors, and the 'update' selector.<br/>
+     * unschedule all scheduled callback functions: custom callback functions, and the 'update' callback function.<br/>
      * Actions are not affected by this method.
      */
-    unscheduleAllSelectors:function () {
-        this.getScheduler().unscheduleAllSelectorsForTarget(this);
+    unscheduleAllCallbacks:function () {
+        this.getScheduler().unscheduleAllCallbacksForTarget(this);
     },
 
     /**
-     * resumes all scheduled selectors and actions.<br/>
+     * resumes all scheduled callback functions and actions.<br/>
      * Called internally by onEnter
      */
     resumeSchedulerAndActions:function () {
@@ -1523,7 +1583,7 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
      * @return {cc.AffineTransform}
      */
     nodeToParentTransform:function () {
-        if (this._isTransformDirty) {
+        if (this._transformDirty) {
             // Translate values
             var x = this._position.x;
             var y = this._position.y;
@@ -1550,7 +1610,6 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
                 y += s * -this._anchorPointInPoints.x * this._scaleX + c * -this._anchorPointInPoints.y * this._scaleY;
             }
 
-
             // Build Transform Matrix
             this._transform = cc.AffineTransformMake(c * this._scaleX, s * this._scaleX,
                 -s * this._scaleY, c * this._scaleY, x, y);
@@ -1568,7 +1627,7 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
                 }
             }
 
-            this._isTransformDirty = false;
+            this._transformDirty = false;
         }
 
         return this._transform;
@@ -1580,9 +1639,9 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
      * @return {Number}
      */
     parentToNodeTransform:function () {
-        if (this._isInverseDirty) {
+        if (this._inverseDirty) {
             this._inverse = cc.AffineTransformInvert(this.nodeToParentTransform());
-            this._isInverseDirty = false;
+            this._inverseDirty = false;
         }
 
         return this._inverse;
@@ -1647,11 +1706,6 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
         return this.convertToWorldSpace(pt);
     },
 
-    /**
-     * @param nodePoint
-     * @return {cc.Point}
-     * @private
-     */
     _convertToWindowSpace:function (nodePoint) {
         var worldPoint = this.convertToWorldSpace(nodePoint);
         return cc.Director.getInstance().convertToUI(worldPoint);
@@ -1663,7 +1717,8 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
      */
     convertTouchToNodeSpace:function (touch) {
         var point = touch.getLocation();
-        point = cc.Director.getInstance().convertToGL(point);
+        //TODO in canvas point don't convert to GL
+        //point = cc.Director.getInstance().convertToGL(point);
         return this.convertToNodeSpace(point);
     },
 
@@ -1678,10 +1733,25 @@ cc.Node = cc.Class.extend(/** @lends cc.Node# */{
         return this.convertToNodeSpaceAR(point);
     },
 
-    /** implement cc.Object's method
+    /** implement cc.Object's method (override me)
      * @param {Number} dt
      */
     update:function (dt) {
+    },
+
+    updateTransform:function(){
+        // Recursively iterate over children
+        this._arrayMakeObjectsPerformSelector(this._children, cc.Node.StateCallbackType.updateTransform);
+    },
+
+    /**
+     * Currently JavaScript Bindigns (JSB), in some cases, needs to use retain and release. This is a bug in JSB,
+     * and the ugly workaround is to use retain/release. So, these 2 methods were added to be compatible with JSB.
+     * This is a hack, and should be removed once JSB fixes the retain/release bug
+     */
+    retain:function () {
+    },
+    release:function () {
     }
 });
 

@@ -53,6 +53,7 @@ cc.DEFAULT_PADDING = 5;
  * @extends cc.Layer
  */
 cc.Menu = cc.Layer.extend(/** @lends cc.Menu# */{
+    RGBAProtocol:true,
     _color:new cc.Color3B(),
 
     /**
@@ -412,7 +413,7 @@ cc.Menu = cc.Layer.extend(/** @lends cc.Menu# */{
      * @return {Boolean}
      */
     onTouchBegan:function (touch, e) {
-        if (this._state != cc.MENU_STATE_WAITING || !this._isVisible || !this._enabled) {
+        if (this._state != cc.MENU_STATE_WAITING || !this._visible || !this._enabled) {
             return false;
         }
 
