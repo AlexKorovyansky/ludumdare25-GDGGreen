@@ -21,8 +21,9 @@ var GameLayer = cc.Layer.extend({
         this.setTouchEnabled(true);
 
         this.pee = new Pee('game/res/armchair_before.png', 'game/res/armchair_after.png', 2);
-        this.pee.setPosition(cc.p(this.screenSize.width * 5 / 6, this.screenSize.height / 3));
+        this.pee.setPosition(cc.p(100, 100));
         this.pee.setAnchorPoint(cc.p(0.5, 0.5));
+        this.pee.setOpacity(250);
         this.addChild(this.pee);
         this._pees.push(this.pee);
 
@@ -76,6 +77,13 @@ var GameLayer = cc.Layer.extend({
 
                 this.pee.decreaseHealth(dt);
                 this.host.increaseAngryLevel();
+
+                if (!this.pee.isEnabled()){
+                    this.pee.setOpacity(190);
+                }
+            }
+            else {
+                this.pee.setOpacity(250);
             }
         }
     },
