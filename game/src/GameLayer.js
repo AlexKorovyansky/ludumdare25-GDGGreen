@@ -73,13 +73,3 @@ GameLayer.create = function () {
     }
     return null;
 };
-
-var GameScene = cc.Scene.extend({
-    onEnter:function () {
-        this._super();
-        var layer = new GameLayer();
-        layer.setAnchorPoint(cc.PointZero());
-        layer.init();
-        this.addChild(layer);
-    }
-});

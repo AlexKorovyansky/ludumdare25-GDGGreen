@@ -41,6 +41,7 @@
             'game/src/Pee.js',
             'game/src/Host.js',
             'game/src/GameLayer.js',
+            'game/src/StartScene.js',
         ]
     };
     window.addEventListener('DOMContentLoaded', function () {
