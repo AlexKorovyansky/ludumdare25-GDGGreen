@@ -34,6 +34,7 @@ var GameLayer = cc.Layer.extend({
 		return true;
 	},
     onTouchesEnded: function(ptouch, evt){
+        cc.AudioEngine.getInstance().playEffect(meow_effect, false);
 		if (this._state == LOOSE){
             return;
         }

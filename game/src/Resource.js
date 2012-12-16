@@ -1,6 +1,7 @@
 //plist
 var s_objects_plist = "game/res/objects.plist";
-
+var background_music = "game/res/sound/bg";
+var meow_effect = "game/res/sound/meow";
 var pee_config = [
 	{
 		before:"game/res/armchair_before.png",
@@ -51,4 +52,8 @@ var g_ressources = [
     
     //plist
     {type:"plist", src:s_objects_plist},
+
+    //music
+    {type:"bgm", src:background_music},
+    {type:"effect", src:meow_effect}
 ];
