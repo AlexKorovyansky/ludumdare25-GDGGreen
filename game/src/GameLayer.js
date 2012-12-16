@@ -4,6 +4,7 @@ var GameLayer = cc.Layer.extend({
     map:null,
     anger:0,
     _pees:[],
+    _roomRect: cc.RectMake(37, 0, 726, 494),
 	init:function () {
 		this._super();
 
@@ -37,8 +38,9 @@ var GameLayer = cc.Layer.extend({
 	},
     onTouchesEnded: function(ptouch, evt){
         var location = ptouch[0].getLocation();
-
-        this.cat.handleTouch(location);
+        if(cc.Rect.CCRectContainsPoint(this._roomRect, location)){
+            this.cat.handleTouch(location);
+        }
     },
     checkForAndResolveCollisions:function(cat) {
         var position = cat.getPosition();
