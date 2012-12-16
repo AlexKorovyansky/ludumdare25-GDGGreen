@@ -45,6 +45,13 @@ var StartScene = cc.Layer.extend({
       scene.addChild(AboutScene.create());
       // scene.addChild(GameControlMenu.create());
       cc.Director.getInstance().replaceScene(cc.TransitionSlideInR.create(1.0, scene));
+    },
+    onEnter:function () {
+        this._super();
+        console.log(cc.AudioEngine.getInstance());
+
+        cc.AudioEngine.getInstance().setBackgroundMusicVolume(1);
+        cc.AudioEngine.getInstance().playBackgroundMusic(background_music, true);
     }
 });
 

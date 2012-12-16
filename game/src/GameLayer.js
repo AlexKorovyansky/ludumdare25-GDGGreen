@@ -33,13 +33,14 @@ var GameLayer = cc.Layer.extend({
         this.addChild(this.host);
 
         this.cat = new Cat();
-        this.cat.setPosition(cc.p(this.screenSize.width / 2 + 50, this.screenSize.height / 2 + 50));
+        this.cat.setPosition(cc.p(this.screenSize.width / 2 + 200, this.screenSize.height / 2 + 100));
         this.addChild(this.cat);
 
         this.scheduleUpdate();
 		return true;
 	},
     onTouchesEnded: function(ptouch, evt){
+        cc.AudioEngine.getInstance().playEffect(meow_effect, false);
 		if (this._state == LOOSE){
             return;
         }
