@@ -40,6 +40,7 @@
             'game/src/Cat.js',
             'game/src/Host.js',
             'game/src/GameLayer.js',
+            'game/src/HackUtils.js',
         ]
     };
     window.addEventListener('DOMContentLoaded', function () {

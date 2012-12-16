@@ -10,12 +10,12 @@ var Host = cc.Sprite.extend({
     	this.setRotation(this._radians);
     },
     catchCat:function(cat, dt) {
-    	console.log(this.sinceLastCatch);
     	this.sinceLastCatch += dt;
     	if(this.sinceLastCatch > 1){
     		this.sinceLastCatch = 0;
     		this.stopAllActions();
-    		this.runAction(cc.MoveTo.create(1, cat.getPosition()));
+            var time = uu.timeMP(this.getPosition(), 200, cat.getPosition());
+    		this.runAction(cc.MoveTo.create(time, cat.getPosition()));
     	}
     }
 });

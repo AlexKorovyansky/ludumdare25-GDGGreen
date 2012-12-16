@@ -58,7 +58,7 @@ var GameLayer = cc.Layer.extend({
         console.log("move")
     },
     update:function(dt){
-        console.log("tick");
+        //console.log(hh.abc());
         // this.host.stopAllActions();
         this.host.catchCat(this.cat, dt);
     }
