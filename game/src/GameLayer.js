@@ -4,7 +4,7 @@ var GameLayer = cc.Layer.extend({
     map:null,
     _pees:[],
     _state:0,
-    _roomRect: cc.RectMake(37, 0, 726, 494),
+    _roomRect: cc.RectMake(37, 0, 726, 514),
     _pbar:null,
 	init:function () {
 		this._super();
