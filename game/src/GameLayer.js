@@ -1,9 +1,10 @@
 
 var GameLayer = cc.Layer.extend({
 	screenSize:null,
-    map   :null,
-    _pees :[],
+    map:null,
+    _pees:[],
     _state:0,
+    _roomRect: cc.RectMake(37, 0, 726, 494),
 	init:function () {
 		this._super();
 
@@ -23,7 +24,7 @@ var GameLayer = cc.Layer.extend({
         this.host.setPosition(cc.p(this.screenSize.width, this.screenSize.height));
         this.addChild(this.host);
 
-        this.pee = new Pee('game/res/back.png', 'game/res/host_man.png');
+        this.pee = new Pee('game/res/box.png', 'game/res/host_man.png');
         this.pee.setPosition(cc.p(this.screenSize.width / 3, this.screenSize.height / 3));
         this.addChild(this.pee);
         this._pees.push(this.pee);
@@ -37,8 +38,9 @@ var GameLayer = cc.Layer.extend({
 	},
     onTouchesEnded: function(ptouch, evt){
         var location = ptouch[0].getLocation();
-
-        this.cat.handleTouch(location);
+        if(cc.Rect.CCRectContainsPoint(this._roomRect, location)){
+            this.cat.handleTouch(location);
+        }
     },
     checkForAndResolveCollisions:function(cat) {
         var cat = this.cat

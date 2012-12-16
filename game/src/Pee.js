@@ -8,7 +8,7 @@ var Pee = cc.Sprite.extend({
     ctor:function (fileName, fileNameActive) {
         this._super();
         this.fileNameActive = fileNameActive;
-        this.initWithFile("game/res/box.png");
+        this.initWithFile(fileName);
         this.setScale(0.5);
         this.scheduleUpdate();
     },
