@@ -65,7 +65,6 @@ var GameLayer = cc.Layer.extend({
               , peeRect = cc.RectMake(parseFloat(pee.getPositionX()), parseFloat(pee.getPositionY()), peeRectWidth, peeRectHeight);
 
             if (cc.Rect.CCRectIntersectsRect(catRect, peeRect)) {
-                // var intersection = cc.Rect.CCRectIntersection(catRect, peeRect);
                 var tileIndx = cc.ArrayGetIndexOfObject(this._pees, pee);
 
                 pee.decreaseHealth(dt);
