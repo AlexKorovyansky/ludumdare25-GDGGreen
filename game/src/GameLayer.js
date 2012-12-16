@@ -12,7 +12,7 @@ var GameLayer = cc.Layer.extend({
 
         this.map = cc.Sprite.create("game/res/room.png");
         this.map.setPosition(cc.p(this.screenSize.width / 2, this.screenSize.height / 2));
-        // this.map.setVisible(true);
+        this.map.setVisible(true);
         this.map.setAnchorPoint(cc.p(0.5, 0.5));
         this.map.setScale(1);
         this.map.setRotation(0);
@@ -20,30 +20,20 @@ var GameLayer = cc.Layer.extend({
 
         this.setTouchEnabled(true);
 
-        this.pee = new Pee('game/res/armchair_before.png', 'game/res/armchair_after.png', 2);
-        this.pee.setPosition(cc.p(100, 100));
-        this.pee.setAnchorPoint(cc.p(0.5, 0.5));
-        this.pee.setOpacity(250);
-        this.addChild(this.pee);
-        this._pees.push(this.pee);
+        this.initPees();
 
         this.host = new Host();
-        this.host.setPosition(cc.p(this.screenSize.width - 120, this.screenSize.height - 160));
-        this.host.setAnchorPoint(cc.p(0.5, 0));
+        this.host.setPosition(cc.p(this.screenSize.width - 90, this.screenSize.height - 60));
         this.addChild(this.host);
 
         this.cat = new Cat();
         this.cat.setPosition(cc.p(this.screenSize.width / 2, this.screenSize.height / 2));
-        this.cat.setAnchorPoint(cc.p(0.5, 0.5));
         this.addChild(this.cat);
 
         this.scheduleUpdate();
 		return true;
 	},
     onTouchesEnded: function(ptouch, evt){
-        if (this._state == LOOSE){
-            return;
-        }
         var location = ptouch[0].getLocation();
         if(cc.Rect.CCRectContainsPoint(this._roomRect, location)){
             this.cat.handleTouch(location);
@@ -52,38 +42,23 @@ var GameLayer = cc.Layer.extend({
     checkForAndResolveCollisions:function(dt) {
         var cat = this.cat
           , host = this.host
-          , catRectWidth = Math.round(cat.getContentSize().height * cat.getScale() / 2)
-          , catRectHeight = Math.round(cat.getContentSize().height * cat.getScale() / 3)
-          , hostRectWidth = Math.round(host.getContentSize().width * host.getScale() / 2)
-          , hostRectHeight = Math.round(host.getContentSize().height * host.getScale() / 10)
-          , catRect = cc.RectMake(parseFloat(cat.getPositionX()), parseFloat(cat.getPositionY()), catRectWidth, catRectHeight)
-          , hostRect = cc.RectMake(parseFloat(host.getPositionX()), parseFloat(host.getPositionY() + hostRectHeight), hostRectWidth, hostRectHeight);
-        // Check if cat is catched
+          , catRect = cc.RectMake(parseFloat(cat.getPositionX()), parseFloat(cat.getPositionY()), cat.getContentSize().width * cat.getScale(), cat.getContentSize().height * cat.getScale())
+          , hostRect = cc.RectMake(parseFloat(host.getPositionX()), parseFloat(host.getPositionY()), host.getContentSize().width * host.getScale(), host.getContentSize().height * host.getScale());
         if (cc.Rect.CCRectIntersectsRect(catRect, hostRect)) {
             this._state = LOOSE;
-            this.cat.stopAllActions();
-            this.host.stopAllActions();
         }
         for (var i = 0, pees_length = this._pees.length; i < pees_length; i++) {
-            var pee = this._pees[i]
-              , catRect = cc.RectMake(parseFloat(cat.getPositionX()), parseFloat(cat.getPositionY()), catRectWidth, catRectHeight)
-              , peeRectWidth = pee.getContentSize().width * pee.getScale() / 1.5
-              , peeRectHeight = pee.getContentSize().height * pee.getScale() / 1.5
-              , peeRect = cc.RectMake(parseFloat(pee.getPositionX()), parseFloat(pee.getPositionY()), peeRectWidth, peeRectHeight);
+            var pee = this._pees[i];    
+            var catRect = cc.RectMake(parseFloat(cat.getPositionX()), parseFloat(cat.getPositionY()), cat.getContentSize().width * cat.getScale(), cat.getContentSize().height * cat.getScale());
+
+            var peeRect = cc.RectMake(parseFloat(pee.getPositionX()), parseFloat(pee.getPositionY()), pee.getContentSize().width * pee.getScale(), pee.getContentSize().height * pee.getScale());
 
             if (cc.Rect.CCRectIntersectsRect(catRect, peeRect)) {
                 // var intersection = cc.Rect.CCRectIntersection(catRect, peeRect);
                 var tileIndx = cc.ArrayGetIndexOfObject(this._pees, pee);
 
-                this.pee.decreaseHealth(dt);
+                pee.decreaseHealth(dt);
                 this.host.increaseAngryLevel();
-
-                if (!this.pee.isEnabled()){
-                    this.pee.setOpacity(190);
-                }
-            }
-            else {
-                this.pee.setOpacity(250);
             }
         }
     },
@@ -94,15 +69,21 @@ var GameLayer = cc.Layer.extend({
         else {
             this.checkForAndResolveCollisions(dt);
             if (this.host.getAngryLevel() != 0){
+                // this.host.runAction(new cc.FadeIn.create(0.1));
                 this.host.catchCat(this.cat, dt);
             }
         }
     },
     endScreen:function(){
-        var scene = cc.Scene.create();
-        scene.addChild(FinalScene.create());
-        // scene.addChild(GameControlMenu.create());
-        cc.Director.getInstance().replaceScene(cc.TransitionFade.create(1.2, scene));
+
+    },
+    initPees:function(){
+        for(var i=0; i < pee_config.length; i++){
+            var pee_conf = pee_config[i];
+            var pee = new Pee(pee_conf);
+            this.addChild(pee);
+            this._pees.push(pee);
+        }
     }
 });
 
