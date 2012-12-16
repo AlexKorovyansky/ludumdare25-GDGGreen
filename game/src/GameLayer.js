@@ -89,7 +89,11 @@ var GameLayer = cc.Layer.extend({
         }
     },
     update:function(dt){
+        if (this._state == CALM){
+            return;
+        }
         if (this._state == LOOSE){
+            this._state = CALM;
             this.endScreen();
         }
         else {
@@ -99,20 +103,25 @@ var GameLayer = cc.Layer.extend({
             }
             if (this._pbar.isWin()){
                 this.winScreen();
-                this._state = WIN;
+                this._state = CALM;
             }
         }
     },
+
+    playMeow: function(){
+        cc.AudioEngine.getInstance().playEffect(meow_effect);
+    },
+
     endScreen:function(){
 		var scene = cc.Scene.create();
         scene.addChild(FinalScene.create());
-        cc.AudioEngine.getInstance().playEffect(meow_effect);
+        this.playMeow();
         cc.Director.getInstance().replaceScene(cc.TransitionFade.create(1.2, scene));
     },
     winScreen:function(){
         var scene = cc.Scene.create();
         scene.addChild(WinScene.create());
-        cc.AudioEngine.getInstance().playEffect(meow_effect);
+        this.playMeow();
         cc.Director.getInstance().replaceScene(cc.TransitionFade.create(1.2, scene));
     },
     initPees:function(){

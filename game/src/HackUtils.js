@@ -1,6 +1,8 @@
+// State that help to determine wheather player loose or not
 LOOSE = 2;
 WIN = 1;
-CALM = 0;
+// Calm state used to prevent multiple effect sound playing at GameLayer
+CALM = 3;
 
 uu = {
 	timeMP: function(ownPosition, ownSpeed, point){
