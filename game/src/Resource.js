@@ -8,7 +8,7 @@ var pee_config = [
 		after:"game/res/armchair_after.png",
 		x: 300,
 		y: 240,
-		level: 1
+		level: 2
 	},
 	{
 		before:"game/res/tv_before.png",
@@ -29,7 +29,7 @@ var pee_config = [
 		after:"game/res/flower_after.png",
 		x: 350,
 		y: 470,
-		level: 1
+		level: 2
 	},
 	{
 		before:"game/res/boots_before.png",
