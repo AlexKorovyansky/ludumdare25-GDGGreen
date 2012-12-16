@@ -40,7 +40,6 @@ var GameLayer = cc.Layer.extend({
 		return true;
 	},
     onTouchesEnded: function(ptouch, evt){
-        cc.AudioEngine.getInstance().playEffect(meow_effect, false);
 		if (this._state == LOOSE){
             return;
         }
@@ -102,6 +101,7 @@ var GameLayer = cc.Layer.extend({
 		var scene = cc.Scene.create();
         scene.addChild(FinalScene.create());
         // scene.addChild(GameControlMenu.create());
+        cc.AudioEngine.getInstance().playEffect(meow_effect, true);
         cc.Director.getInstance().replaceScene(cc.TransitionFade.create(1.2, scene));
 
     },
