@@ -7,7 +7,7 @@ var AngerBar = cc.Sprite.extend({
 
       this.initWithFile('game/res/transparent.png');
 
-      this.setPosition(cc.p(60, 0));
+      this.setPosition(cc.p(0, 20));
 
       this.setAnchorPoint(cc.p(1, 0));
       this.setOpacity(190);
