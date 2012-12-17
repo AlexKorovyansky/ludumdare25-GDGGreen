@@ -62,6 +62,7 @@ var GameLayer = cc.Layer.extend({
             this._state = LOOSE;
             this.cat.stopAllActions();
             this.host.stopAllActions();
+            return;
         }
         var isWin = true;
         for (var i = 0, pees_length = this._pees.length; i < pees_length; i++) {
