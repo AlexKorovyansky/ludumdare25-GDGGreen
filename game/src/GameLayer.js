@@ -40,7 +40,7 @@ var GameLayer = cc.Layer.extend({
 		return true;
 	},
     onTouchesEnded: function(ptouch, evt){
-		if (this._state == LOOSE || this._state == WIN){
+		if (this._state == LOOSE){
             return;
         }
         var location = ptouch[0].getLocation();

@@ -1,5 +1,4 @@
 var GAME = 5;
-var WIN = 1;
 // State that help to determine wheather player loose or not
 var LOOSE = 2;
 // Calm state used to prevent multiple effect sound playing at GameLayer
