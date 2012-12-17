@@ -6,7 +6,9 @@ var AngerBar = cc.Sprite.extend({
       this._super();
 
       this.initWithFile('game/res/transparent.png');
-      this.setPosition(cc.p(60, 30));
+
+      this.setPosition(cc.p(60, 0));
+
       this.setAnchorPoint(cc.p(1, 0));
       this.setOpacity(190);
 
@@ -21,7 +23,7 @@ var AngerBar = cc.Sprite.extend({
       this._progress += value;
     },
     update:function(dt) {
-      var scale = 2 * parseFloat(this._progress) / parseFloat(this._progressMax);
+      var scale = 800 * parseFloat(this._progress) / parseFloat(this._progressMax);
       this._bar.setScaleX(scale);
     }
 });
