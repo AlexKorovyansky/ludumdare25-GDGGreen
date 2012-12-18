@@ -1,8 +1,8 @@
 //plist
 // var s_objects_plist = "game/res/objects.plist";
 
-var background_music = "game/res/sound/bg.mp3";
-var meow_effect 		 = "game/res/sound/meow.mp3";
+var background_music = "game/res/sound/bg";
+var meow_effect 		 = "game/res/sound/meow";
 var pee_config = [
 	{
 		before:"game/res/armchair_before.png",
@@ -64,6 +64,8 @@ var g_ressources = [
     // {type:"plist", src:s_objects_plist},
 
     //music
-    {type:"sound", src:background_music},
-    {type:"sound", src:meow_effect}
+    {type:"sound", src:background_music + ".mp3"},
+    {type:"sound", src:background_music + ".ogg"},
+    {type:"sound", src:meow_effect + ".mp3"},
+    {type:"sound", src:meow_effect + ".ogg"}
 ];
