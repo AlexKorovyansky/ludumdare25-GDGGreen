@@ -23,7 +23,6 @@ var GameLayer = cc.Layer.extend({
 
         this._pbar = new AngerBar();
         this.addChild(this._pbar);
-        this._pbar.scheduleUpdate();
 
         this.initPees();
 
@@ -36,6 +35,7 @@ var GameLayer = cc.Layer.extend({
         this.cat.setPosition(cc.p(this.screenSize.width / 2 + 200, this.screenSize.height / 2 + 100));
         this.addChild(this.cat);
 
+        this._pbar.scheduleUpdate();
         this.scheduleUpdate();
 		return true;
 	},
@@ -135,9 +135,9 @@ var GameLayer = cc.Layer.extend({
         for(var i = 0; i < pee_config.length; i++){
             var pee_conf = pee_config[i];
             var pee = new Pee(pee_conf);
-            this.addChild(pee);
             this._pees.push(pee);
             this._pbar.addMaxProgress(pee_conf.level);
+            this.addChild(pee);
         }
     }
 });

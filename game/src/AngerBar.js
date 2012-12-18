@@ -5,6 +5,9 @@ var AngerBar = cc.Sprite.extend({
     ctor:function () {
       this._super();
 
+      this._progressMax = 0;
+      this._progress = 0;
+
       this.initWithFile('game/res/transparent.png');
 
       this.setPosition(cc.p(0, 20));
@@ -23,7 +26,12 @@ var AngerBar = cc.Sprite.extend({
       this._progress += value;
     },
     update:function(dt) {
-      var scale = 800 * parseFloat(this._progress) / parseFloat(this._progressMax);
+      // TODO: make better dt count - need to get the real anoumt of health the pee lost
+      // 760 - is an absolutely magic constant
+      var scale = 760 * parseFloat(this._progress) / parseFloat(this._progressMax);
+      if (scale == 0){
+        return;
+      }
       this._bar.setScaleX(scale);
     }
 });
