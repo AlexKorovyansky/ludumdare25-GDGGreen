@@ -16,7 +16,7 @@ var Pee = cc.Sprite.extend({
     },
 
     decreaseHealth: function(dt){
-        this._healthLevel -= dt; 
+        this._healthLevel -= dt;
         if(this._healthLevel <= 0 && !this._disabled){
             this.initWithFile(this._after);
             this._disabled = true;

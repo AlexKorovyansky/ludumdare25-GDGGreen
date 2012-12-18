@@ -131,6 +131,7 @@ var GameLayer = cc.Layer.extend({
         cc.Director.getInstance().replaceScene(cc.TransitionFade.create(1.2, scene));
     },
     initPees:function(){
+        this._pees = [];
         for(var i = 0; i < pee_config.length; i++){
             var pee_conf = pee_config[i];
             var pee = new Pee(pee_conf);
