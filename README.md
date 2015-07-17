@@ -9,4 +9,4 @@ This game was developed during participation in LudumDare #25.
 
 The game is about a cat who just wanted to become a little more villainy. The goal is to do your business and avoid being catched by a man.
 
-Here you can play it: http://korovyansk.github.com/ludumdare25-GDGGreen
+Here you can play it: http://alexkorovyansky.github.io/ludumdare25-GDGGreen/
